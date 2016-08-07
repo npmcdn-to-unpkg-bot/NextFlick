@@ -6,7 +6,7 @@ import {Modal, Button, Alert} from 'react-bootstrap'
 import 'react-select/dist/react-select.css'
 import 'react-bootstrap-table/css/react-bootstrap-table-all.min.css'
 import $ from 'jquery'
-
+const {Header: ModalHeader, Title: ModalTitle, Body: ModalBody, Footer: ModalFooter} = Modal
 export default class Admin extends Component {
   constructor (props) {
     super(props)
@@ -416,10 +416,10 @@ export default class Admin extends Component {
                 <TableHeaderColumn dataField='Movie'>Movie</TableHeaderColumn>
               </BootstrapTable>
               <Modal show={this.state.showModal} onHide={this.close}>
-                <Modal.Header closeButton>
-                  <Modal.Title>Edit Movie</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
+                <ModalHeader closeButton>
+                  <ModalTitle>Edit Movie</ModalTitle>
+                </ModalHeader>
+                <ModalBody>
                 <form id='edit-movie-form'>
                   <label>Movie</label>
                   <input className={'form-control'} name='form-movie-name' value={this.state.selectedRow.Movie} placeholder='Movie name' />
@@ -508,11 +508,11 @@ export default class Admin extends Component {
                   <input type='checkbox' name='form-awards' checked={this.state.hasAwards} onClick={this.handleAwardsClick} defaultChecked />
                   <br />
                   </form>
-                </Modal.Body>
-                <Modal.Footer>
+                </ModalBody>
+                <ModalFooter>
                   <Button onClick={this.updateMovie}>Update</Button>
                   <Button onClick={this.close}>Close</Button>
-                </Modal.Footer>
+                </ModalFooter>
               </Modal>
             </div>
         </div>
