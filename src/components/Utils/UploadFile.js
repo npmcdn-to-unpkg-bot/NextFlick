@@ -24,7 +24,7 @@ export default class UploadFile extends Component {
       <div className={'form-group'}>
         <input type='file' id='exampleInputFile' onChange={this.onUploadChanged} />
         <p className={'help-block'}>Select a csv file to upload.</p>
-        <button className={'btn btn-default'} onClick={this.onUpload}>Upload</button>
+        <button className={'btn btn-primary'} onClick={this.onUpload}>Upload</button>
       </div>
     )
   }

@@ -6,6 +6,8 @@ import {Modal, Button, Alert} from 'react-bootstrap'
 import 'react-select/dist/react-select.css'
 import 'react-bootstrap-table/css/react-bootstrap-table-all.min.css'
 import $ from 'jquery'
+import classes from './Admin.scss'
+
 const {Header: ModalHeader, Title: ModalTitle, Body: ModalBody, Footer: ModalFooter} = Modal
 export default class Admin extends Component {
   constructor (props) {
@@ -313,7 +315,8 @@ export default class Admin extends Component {
             <h4>Status</h4>
             <p>{this.state.alertMsj}</p>
           </Alert>
-            <div className={'col-md-4'}>
+            <div className={'col-md-4 panel panel-default'}>
+              <div className={'panel-body'}>
               <UploadFile onMoviesUpload={this.props.uploadMovie} />
               <form onSubmit={this.handleSubmit} id='addMovieForm'>
               <label>Movie</label>
@@ -406,11 +409,14 @@ export default class Admin extends Component {
               <label>Awards</label>
               <input type='checkbox' name='form-awards' defaultChecked />
               <br />
-              <input type='submit' value='Submit' />
+              <input type='submit' value='Submit' className={'btn btn-success'} />
               </form>
             </div>
-            <div className={'col-md-8'}>
-            <input type='button' className={'btn btn-default'} value='Edit Movie' onClick={this.editMovie} />
+            </div>
+            <div className={'col-md-8 panel panel-default'}>
+            <div className={classes['edit-button']}>
+            <input type='button' className={'btn btn-primary'} value='Edit Movie' onClick={this.editMovie} />
+              </div>
               <BootstrapTable data={this.state.Movies} search pagination selectRow={selectRowProp}>
                 <TableHeaderColumn dataField='_id' hidden isKey>Movie ID</TableHeaderColumn>
                 <TableHeaderColumn dataField='Movie'>Movie</TableHeaderColumn>
@@ -510,7 +516,7 @@ export default class Admin extends Component {
                   </form>
                 </ModalBody>
                 <ModalFooter>
-                  <Button onClick={this.updateMovie}>Update</Button>
+                  <Button onClick={this.updateMovie} className={'btn-success'}>Update</Button>
                   <Button onClick={this.close}>Close</Button>
                 </ModalFooter>
               </Modal>
