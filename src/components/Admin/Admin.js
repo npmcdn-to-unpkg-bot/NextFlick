@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {Component} from 'react'
 import UploadFile from 'components/Utils/UploadFile'
 import Select from 'react-select'
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table'
@@ -7,7 +7,7 @@ import 'react-select/dist/react-select.css'
 import 'react-bootstrap-table/css/react-bootstrap-table-all.min.css'
 import $ from 'jquery'
 
-export default class Admin extends React.Component {
+export default class Admin extends Component {
   constructor (props) {
     super(props)
 
