@@ -249,7 +249,7 @@ export default class Home extends Component {
     Promise.resolve(movieScores.map(x => {
       const concatenatedName = x.movie.replace(' ', '+')
       $.ajax({
-        url: 'http://www.omdbapi.com/?t=' + concatenatedName + '&y=&plot=short&r=json&tomatoes=true',
+        url: '//www.omdbapi.com/?t=' + concatenatedName + '&y=&plot=short&r=json&tomatoes=true',
         async: false,
         cache: true,
         success: (result) => {
