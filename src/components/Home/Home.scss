@@ -1,1 +1,9 @@
  .hidden { display:none; }
+
+ .details-div {
+    display: none;
+ }
+
+ .movie-container:hover {
+    display: block;
+}

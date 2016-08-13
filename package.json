@@ -85,6 +85,7 @@
   "author": "David Zukowski <david@zuko.me> (http://zuko.me)",
   "license": "MIT",
   "dependencies": {
+    "async": "^2.0.1",
     "axios": "^0.13.1",
     "babel-cli": "^6.5.1",
     "babel-core": "^6.3.17",
@@ -131,7 +132,9 @@
     "postcss-loader": "^0.9.0",
     "react": "^15.0.0",
     "react-bootstrap": "^0.30.0",
+    "react-bootstrap-async-autocomplete": "0.0.3",
     "react-bootstrap-table": "^2.3.9",
+    "react-bootstrap-typeahead": "^0.8.4",
     "react-data-grid": "^1.0.21",
     "react-dom": "^15.0.0",
     "react-forms": "^1.0.0-rc6",

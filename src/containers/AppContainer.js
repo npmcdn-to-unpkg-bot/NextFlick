@@ -14,8 +14,8 @@ class AppContainer extends Component {
 
     return (
       <Provider store={store}>
-        <div style={{ height: '100%', backgroundColor: '#b8b6b6' }}>
-        <div id='header-band' style={{width: '100%', height: '40px', backgroundColor: 'purple'}}>
+        <div style={{ height: '100%'}}>
+        <div id='header-band' style={{width: '100%', height: '40px', backgroundColor: '#13202d'}}>
           <span style={{fontSize: '17pt', fontFamily: 'fantasy', marginLeft: '12px', color: 'rgba(0,0,0,0.5)'}}>
             NextFLICK
           </span>
