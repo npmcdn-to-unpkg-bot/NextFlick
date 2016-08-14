@@ -7,3 +7,37 @@
  .movie-container:hover {
     display: block;
 }
+
+
+.front {
+    z-index: 5;
+    opacity: 1;
+    display: block;
+    position: absolute;
+    -webkit-transition: opacity .5s ease;
+    &:hover {
+        opacity: 0;
+        z-index: -1;
+    }
+}
+
+.back {
+    text-align: left;
+    font-size: 13px;
+    width: 247px;
+    height: 366px;
+    padding: 10px;
+    color: white;
+    background-color:  rgba(47,41,85,.95);
+    position: absolute;
+    z-index: 0;
+    opacity: 0;
+    -webkit-transition: opacity .5s ease;
+    &:hover {
+        z-index: 100;
+        opacity: 1;        
+    }
+    &:hover + .front {
+        opacity: 0;
+    }
+}

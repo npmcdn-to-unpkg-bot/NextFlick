@@ -279,15 +279,16 @@ export default class Home extends Component {
         <p className={'help-block'}>What will you watch next?</p>
         <form onSubmit={this.getMovies} >
           <div className={'form-group text-center'}>
-            <input type='text' id='movieName' autoComplete={'off'} value={this.state.movieName} onChange={this.onMovieNameChange} className={'form-control'} />
+            <input style={{width: '400px', margin: '0 auto'}} type='text' id='movieName' autoComplete={'off'} value={this.state.movieName} onChange={this.onMovieNameChange} className={'form-control'} />
             {this.state.didYouMeanVisibility ? <p style={{fontStyle: 'italic', color: 'blue'}}>Did you mean <span style={{fontWeight: 'bold'}} onClick={this.onSuggestionClick}>{this.state.didYouMeanMessage}</span> ?</p> : null}
             <p className={'help-block'}>Type in the name of a movie or TV show and get movie recommendations!</p>
           </div>
           <button type='submit' className='btn btn-primary'>Recommend !</button>
         </form>
+        <br />
         <div className={'panel panel-default'}>
           <div>
-            {this.state.recoMovies.map(x => <MovieContainer title={x.Title} poster={x.Poster} />)}
+            {this.state.recoMovies.map((x, i) => <MovieContainer key={i} movie={x} title={x.Title} poster={x.Poster} />)}
           </div>
         </div>
       </div>
