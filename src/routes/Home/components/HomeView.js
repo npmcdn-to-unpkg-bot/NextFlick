@@ -1,5 +1,4 @@
 import React from 'react'
-import DuckImage from '../assets/Duck.jpg'
 import classes from './HomeView.scss'
 
 export const HomeView = () => (
@@ -7,7 +6,7 @@ export const HomeView = () => (
     <img
       alt='This is a duck, because Redux!'
       className={classes.duck}
-      src={DuckImage} />
+    />
     <p className={'help-block'}>What will you watch next?</p>
     <form>
       <div className={'form-group text-center'}>

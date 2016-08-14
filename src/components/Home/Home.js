@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import Matcher from 'did-you-mean'
 import classes from './Home.scss'
 import MovieContainer from './MovieContainer'
+import Logo from './assets/bitmap.png'
 import $ from 'jquery'
 import _ from 'lodash'
 
@@ -272,9 +273,10 @@ export default class Home extends Component {
   render () {
     return (
       <div className={'center-block'}>
-        <img
-          alt='This is a duck, because Redux!'
+        <img src={Logo}
+          alt='This is a  duck, because Redux!'
           className={classes.duck}
+          style={{width: '400px'}}
         />
         <p className={'help-block'}>What will you watch next?</p>
         <form onSubmit={this.getMovies} >
