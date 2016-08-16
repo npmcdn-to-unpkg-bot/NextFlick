@@ -299,14 +299,15 @@ export default class Admin extends Component {
     console.log(this.state.selectedRow)
   }
   render () {
+    if (typeof window.sessionStorage['userIsLogedIn'] === 'undefined') {
+      window.location = './login'
+    } else {
     const selectRowProp = {
       mode: 'radio',
       clickToSelect: true,
       bgColor: 'rgb(238, 193, 213)',
       onSelect: this.onRowSelect
     }
-
-   
 
     return (
       <div className={'container-fluid'}>
@@ -524,5 +525,5 @@ export default class Admin extends Component {
         </div>
       </div>
     )
-  }
+  }}
 }

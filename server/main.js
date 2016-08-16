@@ -22,12 +22,18 @@ const genres = wrap(db.get('genres'))
 const conflicts = wrap(db.get('conflicts'))
 const affiliations = wrap(db.get('affiliations'))
 const locations = wrap(db.get('locations'))
+const users = wrap(db.get('users'))
 
 const debug = _debug('app:server')
 const paths = config.utils_paths
 const app = new Koa()
 const router = require('koa-router')()
 const bodyParser = require('koa-body-parser')
+
+router.post('/api/login', function *() {
+  const result = yield users.count({username: this.request.body.username, password: this.request.body.password})
+  this.body = result === 1
+})
 
 router.get('/api/whatever', function *() {
   const result = yield movies.find({})
@@ -115,6 +121,18 @@ router.get('/api/directors', function *() {
   const result = yield directors.find({})
   this.body = result
 })
+
+const tryLogin = function *(data) {
+  return users.find({username: data.username, password: data.password}, function (err, entry) {
+    if (err) {
+      return 'Error'
+    }
+    if (entry.length === 0) {
+      return false
+    }
+    return true
+  })
+}
 
 const insertMovies = function *(data) {
   return data.map(movie => {
