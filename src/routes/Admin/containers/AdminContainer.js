@@ -2,6 +2,14 @@ import { connect } from 'react-redux'
 import { getData,
   getActors,
   getLocations,
+  uploadMovies,
+  uploadActors,
+  uploadDirectors,
+  uploadAffiliations,
+  uploadConflicts,
+  uploadGenres,
+  uploadLocations,
+  getUploadMovieData,
   getDirectors, getGenres, getConflicts, getAffiliations, saveMovie, editMovie, uploadMovie } from '../modules/admin'
 
 /*  This is a container component. Notice it does not contain any JSX,
@@ -25,7 +33,15 @@ const mapActionCreators = {
   getAffiliations,
   uploadMovie,
   saveMovie,
-  editMovie
+  editMovie,
+  getUploadMovieData,
+  uploadMovies,
+  uploadActors,
+  uploadDirectors,
+  uploadAffiliations,
+  uploadConflicts,
+  uploadGenres,
+  uploadLocations
 }
 
 const mapStateToProps = (state) => {

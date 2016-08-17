@@ -2,7 +2,8 @@ import React, {Component} from 'react'
 import Matcher from 'did-you-mean'
 import classes from './Home.scss'
 import MovieContainer from './MovieContainer'
-import Logo from './assets/bitmap.png'
+import Logo from './assets/newlogo.png'
+import Loader from './assets/ajax-loader.gif'
 import $ from 'jquery'
 import _ from 'lodash'
 
@@ -22,7 +23,8 @@ export default class Home extends Component {
       didYouMeanVisibility: false,
       didYouMeanMessage: 'Did you mean ',
       movieName: '',
-      recoMovies: []
+      recoMovies: [],
+      displayLoader: 'none'
     }
   }
 
@@ -44,7 +46,7 @@ export default class Home extends Component {
 
   getMovies (e) {
     e.preventDefault()
-
+    this.setState({displayLoader: 'initial'})
     console.log(this.state.options)
     if (this.state.movieName !== '') {
       const suggestion = this.state.options.get(this.state.movieName)
@@ -259,7 +261,7 @@ export default class Home extends Component {
           }
         }
       })
-    })).then(this.setState({recoMovies: recoMoviesData}))
+    })).then(this.setState({recoMovies: recoMoviesData, displayLoader: 'none'}))
   }
 
   onMovieNameChange (e) {
@@ -285,10 +287,11 @@ export default class Home extends Component {
             {this.state.didYouMeanVisibility ? <p style={{fontStyle: 'italic', color: 'blue'}}>Did you mean <span style={{fontWeight: 'bold'}} onClick={this.onSuggestionClick}>{this.state.didYouMeanMessage}</span> ?</p> : null}
             <p className={'help-block'}>Type in the name of a movie or TV show and get movie recommendations!</p>
           </div>
-          <button type='submit' className='btn btn-primary'>Recommend !</button>
+          <button type='submit' className='btn btn-danger'>Recommend !</button>
         </form>
         <br />
-        <div className={'panel panel-default'}>
+        <div className={'panel'}>
+          <img src={Loader} alt='Loader' style={{display: this.state.displayLoader}} />
           <div>
             {this.state.recoMovies.map((x, i) => <MovieContainer key={i} movie={x} title={x.Title} poster={x.Poster} />)}
           </div>

@@ -272,6 +272,79 @@ export function uploadNewDirectors (data, st) {
   }
 }
 
+export const getUploadMovieData = (data) => {
+    const reader = new FileReader()
+    let text = ''
+    reader.readAsText(data.file)
+    reader.onload = function (e) {
+      text = csvToJson(reader.result)
+      const array = []
+      for (let i = 0; i < text.length; i++) {
+        const tempObj = {
+          Movie: text[i].Movie,
+          Year: text[i].Year,
+          Awards: text[i].Awards,
+          Indie: text[i].Indie,
+          Location: text[i].Location,
+          StrongFemaleLead: text[i]['Strong Female Lead'],
+          CentralConflict: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Central Conflict') }).map((e) => text[i][e]),
+          Genre: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Genre') }).map((e) => text[i][e]).filter((x) => x !== ''),
+          SimilarActor: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Similar Actor') }).map((e) => text[i][e]).filter((x) => x !== ''),
+          Actor: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Actor') })
+          .map((e) => text[i][e]).filter((x) => x !== '')
+          .filter(x => Object.keys(text[i])
+            .filter(function (k) { return ~k.indexOf('Similar Actor') })
+            .map((e) => text[i][e]).filter((x) => x !== '').indexOf(x) < 0),
+          Director: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Director') })
+          .map((e) => text[i][e]).filter((x) => x !== '')
+          .filter(x => Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Similar Director') })
+            .map((e) => text[i][e]).filter((x) => x !== '').indexOf(x) < 0),
+          SimilarDirector: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Similar Director') }).map((e) => text[i][e]).filter((x) => x !== ''),
+          Affiliation: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Affiliation') }).map((e) => text[i][e]).filter((x) => x !== '' && x !== '\r')
+        }
+        array.push(tempObj)
+      }
+      // FILTER ACTORS
+      const actors = [].concat.apply([], array.map(x => x.Actor)).filter(onlyUnique)
+      const similarActors = [].concat.apply([], array.map(x => x.SimilarActor)).filter(onlyUnique)
+      const fullActors = _.union(actors, similarActors)
+      const actorsObj = []
+      fullActors.map(x => actorsObj.push({ name: x }))
+      // FILTER DIRECTORS
+      const directors = [].concat.apply([], array.map(x => x.Director)).filter(onlyUnique)
+      const similarDirectors = [].concat.apply([], array.map(x => x.SimilarDirector)).filter(onlyUnique)
+      const fullDirectors = _.union(directors, similarDirectors)
+      const directorsObj = []
+      fullDirectors.map(x => directorsObj.push({ name: x }))
+      // FILTER GENRES
+      const genres = [].concat.apply([], array.map(x => x.Genre)).filter(onlyUnique)
+      const genresObj = []
+      genres.map(x => genresObj.push({ name: x }))
+      // FILTER CONFLICTS
+      const conflicts = [].concat.apply([], array.map(x => x.CentralConflict)).filter(onlyUnique)
+      const conflictsObj = []
+      conflicts.map(x => conflictsObj.push({ name: x }))
+      // FILTER AFFILIATIONS
+      const affiliations = [].concat.apply([], array.map(x => x.Affiliation)).filter(onlyUnique)
+      const affiliationsObj = []
+      affiliations.map(x => affiliationsObj.push({ name: x }))
+      // FILTER LOCATION
+      const locations = [].concat.apply([], array.map(x => x.Location)).filter(x => x !== '').filter(onlyUnique)
+      const locationsObj = []
+      locations.map(x => locationsObj.push({ name: x }))
+
+      return {
+        movies: array,
+        actors: actorsObj,
+        directors: directorsObj,
+        genres: genresObj,
+        concat: conflictsObj,
+        affiliations: affiliationsObj,
+        locations: locationsObj
+      }
+    }
+}
+
 export function uploadNewGenres (data, st) {
   return {
     type: UPLOAD_GENRES,
@@ -368,7 +441,6 @@ export const uploadLocations = (data) => {
   }
 }
 
-
 export const saveNewMovie = (data) => {
   return (dispatch, getState) => {
     const movieMeta = getMoviesMetaData(data)
@@ -414,7 +486,15 @@ export const actions = {
   getAffiliations,
   saveMovie,
   editMovie,
-  uploadMovie
+  uploadMovie,
+  getUploadMovieData,
+  uploadMovies,
+  uploadActors,
+  uploadDirectors,
+  uploadAffiliations,
+  uploadConflicts,
+  uploadGenres,
+  uploadLocations
 }
 
 // ------------------------------------

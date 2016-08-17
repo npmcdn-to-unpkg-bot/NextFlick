@@ -9,7 +9,7 @@ export default class Home extends Component {
 
   render () {
     return (
-      <div className={'col-md-3'} key={this.props.movie.Title}>
+      <div className={'col-md-3 ' + classes['col-centered']} key={this.props.movie.Title}>
         <div className={'movie-container-header'}>
           {this.props.movie.Title}
         </div>

@@ -6,7 +6,9 @@ import {Modal, Button, Alert} from 'react-bootstrap'
 import 'react-select/dist/react-select.css'
 import 'react-bootstrap-table/css/react-bootstrap-table-all.min.css'
 import $ from 'jquery'
+import _ from 'lodash'
 import classes from './Admin.scss'
+import Loader from './Assets/ajax-loader.gif'
 
 const {Header: ModalHeader, Title: ModalTitle, Body: ModalBody, Footer: ModalFooter} = Modal
 export default class Admin extends Component {
@@ -78,7 +80,8 @@ export default class Admin extends Component {
       showModal: false,
       isIndie: true,
       hasAwards: true,
-      hasFemaleLead: true
+      hasFemaleLead: true,
+      displayLoader: 'none'
     }
 
     this.onMovieChange = this.onMovieChange.bind(this)
@@ -97,6 +100,10 @@ export default class Admin extends Component {
     this.updateIndieClick = this.updateIndieClick.bind(this)
     this.updateAwardsClick = this.updateAwardsClick.bind(this)
     this.updateFemaleClick = this.updateFemaleClick.bind(this)
+    this.uploadMovie = this.uploadMovie.bind(this)
+    this.getUploadMovieData = this.getUploadMovieData.bind(this)
+    this.csvToJson = this.csvToJson.bind(this)
+    this.uploadMovies = this.props.uploadMovies
   }
 
   componentDidMount () {
@@ -104,7 +111,7 @@ export default class Admin extends Component {
   }
 
   getMovieData () {
-    this.props.getData().then((res) => { this.setState({Movies: res.movies.data}) })
+    this.props.getData().then((res) => { this.setState({Movies: res.movies.data, displayLoader: 'none'}) })
     this.props.getActors().then((res) => {
       const act = res.actors.data.map(function (elem) { return { value: elem.name, label: elem.name} })
       this.setState({Actors: act})
@@ -165,17 +172,17 @@ export default class Admin extends Component {
     let newMovie = {
       Movie: serializeData.filter(x => x.name === 'form-movie-name').length === 1 ? serializeData.filter(x => x.name === 'form-movie-name')[0].value : '',
       Year: serializeData.filter(x => x.name === 'form-year').length === 1 ? serializeData.filter(x => x.name === 'form-year')[0].value : '',
-      Genre: serializeData.filter(x => x.name === 'form-genres').length === 1 ? serializeData.filter(x => x.name === 'form-genres')[0].value.split(',').map(x => x.trim()) : '',
-      Director: serializeData.filter(x => x.name === 'form-directors').length === 1 ? serializeData.filter(x => x.name === 'form-directors')[0].value.split(',').map(x => x.trim()) : '',
-      Actor: serializeData.filter(x => x.name === 'form-actors').length === 1 ? serializeData.filter(x => x.name === 'form-actors')[0].value.split(',').map(x => x.trim()) : '',
-      SimilarDirector: serializeData.filter(x => x.name === 'form-sim-directors').length === 1 ? serializeData.filter(x => x.name === 'form-sim-directors')[0].value.split(',').map(x => x.trim()) : '',
-      SimilarActor: serializeData.filter(x => x.name === 'form-sim-actors').length === 1 ? serializeData.filter(x => x.name === 'form-sim-actors')[0].value.split(',').map(x => x.trim()) : '',
+      Genre: serializeData.filter(x => x.name === 'form-genres').length === 1 && serializeData.filter(x => x.name === 'form-genres')[0].value !== '' ? serializeData.filter(x => x.name === 'form-genres')[0].value.split(',').map(x => x.trim()) : [],
+      Director: serializeData.filter(x => x.name === 'form-directors').length === 1 && serializeData.filter(x => x.name === 'form-directors')[0].value !== '' ? serializeData.filter(x => x.name === 'form-directors')[0].value.split(',').map(x => x.trim()) : [],
+      Actor: serializeData.filter(x => x.name === 'form-actors').length === 1 && serializeData.filter(x => x.name === 'form-actors')[0].value !== '' ? serializeData.filter(x => x.name === 'form-actors')[0].value.split(',').map(x => x.trim()) : [],
+      SimilarDirector: serializeData.filter(x => x.name === 'form-sim-directors').length === 1 && serializeData.filter(x => x.name === 'form-sim-directors')[0].value !== '' ? serializeData.filter(x => x.name === 'form-sim-directors')[0].value.split(',').map(x => x.trim()) : [],
+      SimilarActor: serializeData.filter(x => x.name === 'form-sim-actors').length === 1 && serializeData.filter(x => x.name === 'form-sim-actors')[0].value !== '' ? serializeData.filter(x => x.name === 'form-sim-actors')[0].value.split(',').map(x => x.trim()) : [],
       Indie: indie,
       Location: serializeData.filter(x => x.name === 'form-location').length === 1 ? serializeData.filter(x => x.name === 'form-location')[0].value : '',
       StrongFemaleLead: strongFemaleLead,
       Awards: awards,
-      CentralConflict: serializeData.filter(x => x.name === 'form-conflicts').length === 1 ? serializeData.filter(x => x.name === 'form-conflicts')[0].value.split(',').map(x => x.trim()) : '',
-      Affiliation: serializeData.filter(x => x.name === 'form-affiliations').length === 1 ? serializeData.filter(x => x.name === 'form-affiliations')[0].value.split(',').map(x => x.trim()) : ''
+      CentralConflict: serializeData.filter(x => x.name === 'form-conflicts').length === 1 && serializeData.filter(x => x.name === 'form-conflicts')[0].value !== '' ? serializeData.filter(x => x.name === 'form-conflicts')[0].value.split(',').map(x => x.trim()) : [],
+      Affiliation: serializeData.filter(x => x.name === 'form-affiliations').length === 1 && serializeData.filter(x => x.name === 'form-affiliations')[0].value !== '' ? serializeData.filter(x => x.name === 'form-affiliations')[0].value.split(',').map(x => x.trim()) : []
     }
     const movieObj = []
     movieObj.push(newMovie)
@@ -232,17 +239,17 @@ export default class Admin extends Component {
     let newMovie = {
       Movie: serializeData.filter(x => x.name === 'form-movie-name').length === 1 ? serializeData.filter(x => x.name === 'form-movie-name')[0].value : '',
       Year: serializeData.filter(x => x.name === 'form-year').length === 1 ? serializeData.filter(x => x.name === 'form-year')[0].value : '',
-      Genre: serializeData.filter(x => x.name === 'form-genres').length === 1 ? serializeData.filter(x => x.name === 'form-genres')[0].value.split(',').map(x => x.trim()) : '',
-      Director: serializeData.filter(x => x.name === 'form-directors').length === 1 ? serializeData.filter(x => x.name === 'form-directors')[0].value.split(',').map(x => x.trim()) : '',
-      Actor: serializeData.filter(x => x.name === 'form-actors').length === 1 ? serializeData.filter(x => x.name === 'form-actors')[0].value.split(',').map(x => x.trim()) : '',
-      SimilarDirector: serializeData.filter(x => x.name === 'form-sim-directors').length === 1 ? serializeData.filter(x => x.name === 'form-sim-directors')[0].value.split(',').map(x => x.trim()) : '',
-      SimilarActor: serializeData.filter(x => x.name === 'form-sim-actors').length === 1 ? serializeData.filter(x => x.name === 'form-sim-actors')[0].value.split(',').map(x => x.trim()) : '',
+      Genre: serializeData.filter(x => x.name === 'form-genres').length === 1 && serializeData.filter(x => x.name === 'form-genres')[0].value !== '' ? serializeData.filter(x => x.name === 'form-genres')[0].value.split(',').map(x => x.trim()) : [],
+      Director: serializeData.filter(x => x.name === 'form-directors').length === 1 && serializeData.filter(x => x.name === 'form-directors')[0].value !== '' ? serializeData.filter(x => x.name === 'form-directors')[0].value.split(',').map(x => x.trim()) : [],
+      Actor: serializeData.filter(x => x.name === 'form-actors').length === 1 && serializeData.filter(x => x.name === 'form-actors')[0].value !== '' ? serializeData.filter(x => x.name === 'form-actors')[0].value.split(',').map(x => x.trim()) : [],
+      SimilarDirector: serializeData.filter(x => x.name === 'form-sim-directors').length === 1 && serializeData.filter(x => x.name === 'form-sim-directors')[0].value !== '' ? serializeData.filter(x => x.name === 'form-sim-directors')[0].value.split(',').map(x => x.trim()) : [],
+      SimilarActor: serializeData.filter(x => x.name === 'form-sim-actors').length === 1 && serializeData.filter(x => x.name === 'form-sim-actors')[0].value !== '' ? serializeData.filter(x => x.name === 'form-sim-actors')[0].value.split(',').map(x => x.trim()) : [],
       Indie: indie,
       Location: serializeData.filter(x => x.name === 'form-location').length === 1 ? serializeData.filter(x => x.name === 'form-location')[0].value : '',
       StrongFemaleLead: strongFemaleLead,
       Awards: awards,
-      CentralConflict: serializeData.filter(x => x.name === 'form-conflicts').length === 1 ? serializeData.filter(x => x.name === 'form-conflicts')[0].value.split(',').map(x => x.trim()) : '',
-      Affiliation: serializeData.filter(x => x.name === 'form-affiliations').length === 1 ? serializeData.filter(x => x.name === 'form-affiliations')[0].value.split(',').map(x => x.trim()) : ''
+      CentralConflict: serializeData.filter(x => x.name === 'form-conflicts').length === 1 && serializeData.filter(x => x.name === 'form-conflicts')[0].value !== '' ? serializeData.filter(x => x.name === 'form-conflicts')[0].value.split(',').map(x => x.trim()) : [],
+      Affiliation: serializeData.filter(x => x.name === 'form-affiliations').length === 1 && serializeData.filter(x => x.name === 'form-affiliations')[0].value !== '' ? serializeData.filter(x => x.name === 'form-affiliations')[0].value.split(',').map(x => x.trim()) : []
     }
     const movieObj = []
     movieObj.push(newMovie)
@@ -298,18 +305,126 @@ export default class Admin extends Component {
     this.setState({ showModal: true })
     console.log(this.state.selectedRow)
   }
+
+  csvToJson (csv) {
+    const content = csv.split('\n')
+    const header = content[0].split(',')
+    return _.tail(content).map((row) => {
+      return _.zipObject(header, row.split(','))
+    })
+  }
+
+  getUploadMovieData (data) {
+    const reader = new FileReader()
+    let text = ''
+    function csvToJson (csv) {
+      const content = csv.split('\n')
+      const header = content[0].split(',')
+      return _.tail(content).map((row) => {
+        return _.zipObject(header, row.split(','))
+      })
+    }
+    function onlyUnique (value, index, self) {
+      return self.indexOf(value) === index
+    }
+    reader.readAsText(data.file)
+    const self = this
+    reader.onload = function (e) {
+      text = csvToJson(reader.result)
+      const array = []
+      for (let i = 0; i < text.length; i++) {
+        const tempObj = {
+          Movie: text[i].Movie,
+          Year: text[i].Year,
+          Awards: text[i].Awards,
+          Indie: text[i].Indie,
+          Location: text[i].Location,
+          StrongFemaleLead: text[i]['Strong Female Lead'],
+          CentralConflict: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Central Conflict') }).map((e) => text[i][e]),
+          Genre: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Genre') }).map((e) => text[i][e]).filter((x) => x !== ''),
+          SimilarActor: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Similar Actor') }).map((e) => text[i][e]).filter((x) => x !== ''),
+          Actor: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Actor') })
+            .map((e) => text[i][e]).filter((x) => x !== '')
+            .filter(x => Object.keys(text[i])
+            .filter(function (k) { return ~k.indexOf('Similar Actor') })
+            .map((e) => text[i][e]).filter((x) => x !== '').indexOf(x) < 0),
+          Director: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Director') })
+            .map((e) => text[i][e]).filter((x) => x !== '')
+            .filter(x => Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Similar Director') })
+            .map((e) => text[i][e]).filter((x) => x !== '').indexOf(x) < 0),
+          SimilarDirector: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Similar Director') }).map((e) => text[i][e]).filter((x) => x !== ''),
+          Affiliation: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Affiliation') }).map((e) => text[i][e]).filter((x) => x !== '' && x !== '\r')
+        }
+        array.push(tempObj)
+      }
+      // FILTER ACTORS
+      const actors = [].concat.apply([], array.map(x => x.Actor)).filter(onlyUnique)
+      const similarActors = [].concat.apply([], array.map(x => x.SimilarActor)).filter(onlyUnique)
+      const fullActors = _.union(actors, similarActors)
+      const actorsObj = []
+      fullActors.map(x => actorsObj.push({ name: x }))
+      // FILTER DIRECTORS
+      const directors = [].concat.apply([], array.map(x => x.Director)).filter(onlyUnique)
+      const similarDirectors = [].concat.apply([], array.map(x => x.SimilarDirector)).filter(onlyUnique)
+      const fullDirectors = _.union(directors, similarDirectors)
+      const directorsObj = []
+      fullDirectors.map(x => directorsObj.push({ name: x }))
+      // FILTER GENRES
+      const genres = [].concat.apply([], array.map(x => x.Genre)).filter(onlyUnique)
+      const genresObj = []
+      genres.map(x => genresObj.push({ name: x }))
+      // FILTER CONFLICTS
+      const conflicts = [].concat.apply([], array.map(x => x.CentralConflict)).filter(onlyUnique)
+      const conflictsObj = []
+      conflicts.map(x => conflictsObj.push({ name: x }))
+      // FILTER AFFILIATIONS
+      const affiliations = [].concat.apply([], array.map(x => x.Affiliation)).filter(onlyUnique)
+      const affiliationsObj = []
+      affiliations.map(x => affiliationsObj.push({ name: x }))
+      // FILTER LOCATION
+      const locations = [].concat.apply([], array.map(x => x.Location)).filter(x => x !== '').filter(onlyUnique)
+      const locationsObj = []
+      locations.map(x => locationsObj.push({ name: x }))
+
+      const uploadData = {
+        movies: array,
+        actors: actorsObj,
+        directors: directorsObj,
+        genres: genresObj,
+        conflicts: conflictsObj,
+        affiliations: affiliationsObj,
+        locations: locationsObj
+      }
+      const promisesArr = [self.uploadMovies(uploadData.movies),
+        self.props.uploadActors(uploadData.actors),
+        self.props.uploadDirectors(uploadData.directors),
+        self.props.uploadAffiliations(uploadData.affiliations),
+        self.props.uploadConflicts(uploadData.conflicts),
+        self.props.uploadGenres(uploadData.genres),
+        self.props.uploadLocations(uploadData.locations)
+        ]
+
+      Promise.all(promisesArr).then((d) => { console.log('--Getting Data--'); self.getMovieData() })
+    }
+  }
+
+  uploadMovie (file) {
+    this.setState({displayLoader: 'initial'})
+    this.getUploadMovieData(file)
+  }
+
   render () {
     if (typeof window.sessionStorage['userIsLogedIn'] === 'undefined') {
       window.location = './login'
     } else {
-    const selectRowProp = {
-      mode: 'radio',
-      clickToSelect: true,
-      bgColor: 'rgb(238, 193, 213)',
-      onSelect: this.onRowSelect
-    }
+      const selectRowProp = {
+        mode: 'radio',
+        clickToSelect: true,
+        bgColor: 'rgb(238, 193, 213)',
+        onSelect: this.onRowSelect
+      }
 
-    return (
+      return (
       <div className={'container-fluid'}>
         <div className={'row'}>
           <Alert bsStyle={this.state.alertType} >
@@ -318,7 +433,8 @@ export default class Admin extends Component {
           </Alert>
             <div className={'col-md-4 panel panel-default'}>
               <div className={'panel-body'}>
-              <UploadFile onMoviesUpload={this.props.uploadMovie} />
+              <UploadFile onMoviesUpload={this.uploadMovie} />
+              <img src={Loader} alt='HTML5 Icon' style={{display: this.state.displayLoader}} />
               <form onSubmit={this.handleSubmit} id='addMovieForm'>
               <label>Movie</label>
               <input className={'form-control'}
@@ -525,5 +641,5 @@ export default class Admin extends Component {
         </div>
       </div>
     )
-  }}
+    } }
 }

@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { Router } from 'react-router'
 import { Provider } from 'react-redux'
+import Logo from './assets/newlogo.png'
 
 class AppContainer extends Component {
   static propTypes = {
@@ -32,11 +33,11 @@ class AppContainer extends Component {
       <Provider store={store}>
         <div style={{ height: '100%'}}>
         <input type='hidden' id='displayLogout' value={this.state.displayLogout} onChange={this.updateDisplay}/>
-        <div id='header-band' style={{width: '100%', height: '40px', backgroundColor: '#2f2955'}}>
+        <div id='header-band' style={{width: '100%', height: '40px', backgroundColor: 'black'}}>
           <span style={{fontSize: '17pt', fontFamily: 'fantasy', marginLeft: '12px', color: 'rgba(0,0,0,0.5)'}}>
-            NextFLICK
+            <img src={Logo} style={{width: '85px'}} />
           </span>
-          <span style={{cursor: 'pointer', display: this.state.displayLogout}} onClick={this.onLogout} >
+          <span style={{cursor: 'pointer', display: this.state.displayLogout, color: 'white'}} onClick={this.onLogout} >
           <span style={{float: 'right', marginRight: '30px', marginTop: '10px', cursor: 'pointer'}}>
             LogOut
           </span>

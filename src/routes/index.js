@@ -12,7 +12,7 @@ import LoginRoute from './Login'
 export const createRoutes = (store) => ({
   path: '/',
   component: CoreLayout,
-  indexRoute: Home,
+  indexRoute: HomeRoute(store),
   childRoutes: [
     CounterRoute(store),
     AdminRoute(store),
