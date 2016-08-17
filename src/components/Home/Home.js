@@ -244,7 +244,7 @@ export default class Home extends Component {
         }
       }
 
-      movieScores = _.sortBy(movieScores, 'score').reverse().filter(x => x.score >= 36)
+      movieScores = _.sortBy(movieScores, 'score').reverse().filter(x => x.score >= 15)
 
       const moviesWithYear = this.state.moviesData
         .filter(x => {
