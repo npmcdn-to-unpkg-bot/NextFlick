@@ -243,7 +243,25 @@ export default class Home extends Component {
           }
         }
       }
-      movieScores = _.sortBy(movieScores, 'score').reverse().filter(x => x.score >= 30)
+
+      movieScores = _.sortBy(movieScores, 'score').reverse().filter(x => x.score >= 36)
+
+      const moviesWithYear = this.state.moviesData
+        .filter(x => {
+          for (let j = 0; j < movieScores.length; j++) {
+            if (x.Movie.trim().toLowerCase() === movieScores[j].movie.trim().toLowerCase()) {
+              return true
+            }
+          }
+          return false
+        })
+      moviesWithYear.map(x => {
+        if (Math.abs(x.Year - thisMovie.Year) >= 10) {
+          const currMovie = movieScores.filter(y => y.movie === x.Movie)[0]
+          currMovie.score = currMovie.score - 3
+        }
+      })
+
       console.log(movieScores)
     }
 
