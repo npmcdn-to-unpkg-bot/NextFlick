@@ -275,11 +275,37 @@ export default class Home extends Component {
         cache: true,
         success: (result) => {
           if (result.Response === 'True') {
+            result.score = x.score
+            if (result.tomatoRating < 6) {
+              if (typeof result.score === 'undefined') {
+                result.score = x.score - 3
+              } else {
+                result.score = result.score - 3
+              }
+            }
+
+            if (result.tomatoMeter < 60) {
+              if (typeof result.score === 'undefined') {
+                result.score = x.score - 3
+              } else {
+                result.score = result.score - 3
+              }
+            }
+
+            if (result.tomatoUserMeter < 60) {
+              if (typeof result.score === 'undefined') {
+                result.score = x.score - 3
+              } else {
+                result.score = result.score - 3
+              }
+            }
             recoMoviesData.push(result)
           }
         }
       })
-    })).then(this.setState({recoMovies: recoMoviesData, displayLoader: 'none'}))
+    })).then(() => {
+      this.setState({recoMovies: _.sortBy(recoMoviesData, 'score').reverse().filter(x => x.score >= 15), displayLoader: 'none'})
+    })
   }
 
   onMovieNameChange (e) {

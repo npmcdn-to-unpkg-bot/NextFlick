@@ -16,7 +16,7 @@ export default class Home extends Component {
     }
     return (
       <div className={'col-md-3 ' + classes['col-centered']} key={this.props.movie.Title}>
-        <div className={'movie-container-header'}>
+        <div className={'movie-container-header'} style={{textAlign: 'center'}}>
           {this.props.movie.Title}
         </div>
         <div className={classes['front']}>

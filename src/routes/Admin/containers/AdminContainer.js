@@ -10,6 +10,7 @@ import { getData,
   uploadGenres,
   uploadLocations,
   getUploadMovieData,
+  deleteMovie,
   getDirectors, getGenres, getConflicts, getAffiliations, saveMovie, editMovie, uploadMovie } from '../modules/admin'
 
 /*  This is a container component. Notice it does not contain any JSX,
@@ -41,7 +42,8 @@ const mapActionCreators = {
   uploadAffiliations,
   uploadConflicts,
   uploadGenres,
-  uploadLocations
+  uploadLocations,
+  deleteMovie
 }
 
 const mapStateToProps = (state) => {

@@ -10,6 +10,7 @@
 
 
 .front {
+    cursor: pointer;
     z-index: 5;
     opacity: 1;
     display: block;
@@ -23,10 +24,10 @@
 
 .back {
     text-align: left;
+    cursor: pointer;
     font-size: 13px;
-    width: 247px;
-    height: 366px;
-    height: 366px;
+    width: 248px;
+    height: 367px;
     padding: 10px;
     color: white;
     background-color:  rgba(47,41,85,.95);

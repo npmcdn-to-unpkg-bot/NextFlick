@@ -93,6 +93,7 @@ export default class Admin extends Component {
     this.open = this.open.bind(this)
     this.updateMovie = this.updateMovie.bind(this)
     this.editMovie = this.editMovie.bind(this)
+    this.deleteMovie = this.deleteMovie.bind(this)
     this.getMovieData = this.getMovieData.bind(this)
     this.handleIndieClick = this.handleIndieClick.bind(this)
     this.handleAwardsClick = this.handleAwardsClick.bind(this)
@@ -306,6 +307,36 @@ export default class Admin extends Component {
     console.log(this.state.selectedRow)
   }
 
+  deleteMovie () {
+    if (this.state.selectedRow._id === '') {
+      this.setState({alertMsj: 'Select a movie before deleting', alertType: 'danger'})
+      return
+    }
+    console.log(this.state.selectedRow._id)
+    const body = {
+      id: this.state.selectedRow._id
+    }
+    Promise.resolve(this.props.deleteMovie(body)).then(this.getMovieData())
+    const movieName = this.state.selectedRow.Movie
+    const selectedRow = {
+      _id: '',
+      Movie: '',
+      Year: '',
+      Genre: [],
+      Director: [],
+      Actor: [],
+      SimilarDirector: [],
+      SimilarActor: [],
+      Indie: '',
+      Location: '',
+      StrongFemaleLead: '',
+      Awards: '',
+      CentralConflict: [],
+      Affiliation: []
+    }
+    this.setState({ alertType: 'danger', selectedRow: selectedRow, alertMsj: movieName + ' was deleted!' })
+  }
+
   csvToJson (csv) {
     const content = csv.split('\n')
     const header = content[0].split(',')
@@ -346,12 +377,12 @@ export default class Admin extends Component {
           Actor: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Actor') })
             .map((e) => text[i][e]).filter((x) => x !== '')
             .filter(x => Object.keys(text[i])
-            .filter(function (k) { return ~k.indexOf('Similar Actor') })
-            .map((e) => text[i][e]).filter((x) => x !== '').indexOf(x) < 0),
+              .filter(function (k) { return ~k.indexOf('Similar Actor') })
+              .map((e) => text[i][e]).filter((x) => x !== '').indexOf(x) < 0),
           Director: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Director') })
             .map((e) => text[i][e]).filter((x) => x !== '')
             .filter(x => Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Similar Director') })
-            .map((e) => text[i][e]).filter((x) => x !== '').indexOf(x) < 0),
+              .map((e) => text[i][e]).filter((x) => x !== '').indexOf(x) < 0),
           SimilarDirector: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Similar Director') }).map((e) => text[i][e]).filter((x) => x !== ''),
           Affiliation: Object.keys(text[i]).filter(function (k) { return ~k.indexOf('Affiliation') }).map((e) => text[i][e]).filter((x) => x !== '' && x !== '\r')
         }
@@ -531,8 +562,9 @@ export default class Admin extends Component {
             </div>
             </div>
             <div className={'col-md-8 panel panel-default'}>
-            <div className={classes['edit-button']}>
-            <input type='button' className={'btn btn-primary'} value='Edit Movie' onClick={this.editMovie} />
+            <div className={classes['edit-button']} style={{display: 'inline'}}>
+            <input type='button' className={'btn btn-primary'} style={{float: 'left', marginLeft: '10px', marginTop: '26px'}} value='Edit Movie' onClick={this.editMovie} />
+            <input type='button' className={'btn btn-danger'} value='Delete Movie' style={{float: 'right', marginTop: '26px', marginRight: '10px'}} onClick={this.deleteMovie} />
               </div>
               <BootstrapTable data={this.state.Movies} search pagination selectRow={selectRowProp}>
                 <TableHeaderColumn dataField='_id' hidden isKey>Movie ID</TableHeaderColumn>

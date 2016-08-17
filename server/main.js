@@ -116,6 +116,11 @@ router.post('/api/editMovie', function *() {
   const result = yield movies.find({})
   this.body = result
 })
+router.post('/api/deleteMovie', function *() {
+  yield deleteMovie(this.request.body)
+  const result = yield movies.find({})
+  this.body = result
+})
 
 router.get('/api/directors', function *() {
   const result = yield directors.find({})
@@ -177,6 +182,19 @@ const editMovie = function *(data) {
       }
     })
   })
+}
+
+const deleteMovie = function *(data) {
+  console.log(data)
+  movies.find({_id: monk.id(data.id)}, function (err, entry) {
+    if (err) {
+      console.log('Error in first query')
+      // return res.status(500).send('Something went wrong getting the data')
+    }
+    console.log(entry)
+  })
+  movies.remove({_id: monk.id(data.id)})
+  return 1 // movies.remove({Movie: data})
 }
 
 const insertActors = function *(data) {
