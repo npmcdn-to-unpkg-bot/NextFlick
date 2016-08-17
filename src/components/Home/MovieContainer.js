@@ -5,16 +5,22 @@ export default class Home extends Component {
   constructor (props) {
     super(props)
     console.log(this.props)
+    this.state = {
+      newRow: false
+    }
   }
 
   render () {
+    if ((this.props.index + 1) % 3 === 0) {
+
+    }
     return (
       <div className={'col-md-3 ' + classes['col-centered']} key={this.props.movie.Title}>
         <div className={'movie-container-header'}>
           {this.props.movie.Title}
         </div>
         <div className={classes['front']}>
-          <img src={this.props.movie.Poster} width='247' />
+          <img src={this.props.movie.Poster} width='247' height='366' />
         </div>
         <div className={classes['back']}>
           <div>
