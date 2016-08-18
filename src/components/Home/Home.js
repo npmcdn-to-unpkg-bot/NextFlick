@@ -358,10 +358,8 @@ export default class Home extends Component {
               .filter((x, i) => i < this.state.nrOfMoviesPerPage * this.state.selectedPage && i >= this.state.nrOfMoviesPerPage * this.state.selectedPage - this.state.nrOfMoviesPerPage)
               .map((x, i) => <MovieContainer key={i} movie={x} title={x.Title} poster={x.Poster} />)}
           </div>
-          <div>
+          <div style={{display: this.state.numberOfMovieis === 0 ? 'none' : 'initial'}}>
             <Pagination
-              prev
-              next
               first
               last
               ellipsis
