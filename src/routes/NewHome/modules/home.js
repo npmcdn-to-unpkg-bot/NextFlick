@@ -27,6 +27,12 @@ export const getMovies = () => {
     return request.get('/api/whatever').then((data) => dispatch(receiveMovies(data)))
   }
 }
+
+export const getRecommendations = (data) => {
+  return (dispatch, getState) => {
+    return request.post('/api/recommendations', data).then((data) => dispatch(receiveMovies(data)))
+  }
+}
 /*  This is a thunk, meaning it is a function that immediately
     returns a function for lazy evaluation. It is incredibly useful for
     creating async actions, especially when combined with redux-thunk!
@@ -49,7 +55,8 @@ export const doubleAsync = () => {
 export const actions = {
   increment,
   doubleAsync,
-  getMovies
+  getMovies,
+  getRecommendations
 }
 
 // ------------------------------------

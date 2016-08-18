@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import UploadFile from 'components/Utils/UploadFile'
 import Select from 'react-select'
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table'
-import {Modal, Button, Alert} from 'react-bootstrap'
+import {Modal, Button, Alert, Tabs, Tab} from 'react-bootstrap'
 import 'react-select/dist/react-select.css'
 import 'react-bootstrap-table/css/react-bootstrap-table-all.min.css'
 import $ from 'jquery'
@@ -456,6 +456,7 @@ export default class Admin extends Component {
       }
 
       return (
+        
       <div className={'container-fluid'}>
         <div className={'row'}>
           <Alert bsStyle={this.state.alertType} >
@@ -562,6 +563,9 @@ export default class Admin extends Component {
             </div>
             </div>
             <div className={'col-md-8 panel panel-default'}>
+            <Tabs defaultActiveKey={1} id="uncontrolled-tab-example">
+              <Tab eventKey={1} title='Movies Management'>
+             
             <div className={classes['edit-button']} style={{display: 'inline'}}>
             <input type='button' className={'btn btn-primary'} style={{float: 'left', marginLeft: '10px', marginTop: '26px'}} value='Edit Movie' onClick={this.editMovie} />
             <input type='button' className={'btn btn-danger'} value='Delete Movie' style={{float: 'right', marginTop: '26px', marginRight: '10px'}} onClick={this.deleteMovie} />
@@ -669,7 +673,23 @@ export default class Admin extends Component {
                   <Button onClick={this.close}>Close</Button>
                 </ModalFooter>
               </Modal>
+              </Tab>
+              <Tab eventKey={2} title='Third party data'>
+                <div style={{marginTop: '20px'}}>
+                  <label style={{float: 'left'}}>Get posters for movies. Required after adding a movie or uploading movies</label>
+                  <br />
+                  <br />
+                  <Button onClick={this.props.getAdditionalData} className={'btn-success'} style={{float: 'left'}} >Get posters and RT scores</Button>
+                  <img src={Loader} alt='HTML5 Icon' style={{float: 'left', marginTop: '7px', marginLeft: '30px'}}/>
+                  <br />
+                  <br />
+                  <hr />
+                </div>
+              </Tab>
+              <Tab eventKey={3} title='Point system management'></Tab>
+            </Tabs>
             </div>
+            
         </div>
       </div>
     )

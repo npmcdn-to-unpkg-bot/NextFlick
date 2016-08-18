@@ -15,30 +15,30 @@ export default class Home extends Component {
 
     }
     return (
-      <div className={'col-md-3 ' + classes['col-centered']} key={this.props.movie.Title}>
+      <div className={'col-md-3 ' + classes['col-centered']} key={this.props.movie._id}>
         <div className={'movie-container-header'} style={{textAlign: 'center'}}>
-          {this.props.movie.Title}
+          {this.props.movie.Movie}
         </div>
         <div className={classes['front']}>
-          <img src={this.props.movie.Poster} width='247' height='366' />
+          <img src={this.props.movie.addPoster} width='247' height='366' />
         </div>
         <div className={classes['back']}>
           <div>
-            <span style={{fontWeight: 'bold'}}>SUMMARY</span><br /> {this.props.movie.Plot}
+            <span style={{fontWeight: 'bold'}}>SUMMARY</span><br /> {this.props.movie.addPlot}
           </div>
           <br />
           <div>
-            <span style={{fontWeight: 'bold'}}>CAST</span><br /> {this.props.movie.Actors}
+            <span style={{fontWeight: 'bold'}}>CAST</span><br /> {this.props.movie.addActors}
           </div>
           <br />
           <div>
-            <span style={{fontWeight: 'bold'}}>DIRECTOR</span><br /> {this.props.movie.Director}
+            <span style={{fontWeight: 'bold'}}>DIRECTOR</span><br /> {this.props.movie.addDirector}
           </div>
           <br />
           <div>
-            <div style={{fontWeight: 'bold', float: 'left', marginRight: '3px'}}>Average Rating<br /> {this.props.movie.tomatoRating}</div>
-            <div style={{fontWeight: 'bold', float: 'left', marginRight: '3px'}}>RT Rating<br /> {this.props.movie.tomatoMeter}%</div>
-            <div style={{fontWeight: 'bold', float: 'left'}}>RT Audience<br /> {this.props.movie.tomatoUserMeter}%</div>
+            <div style={{fontWeight: 'bold', float: 'left', marginRight: '3px'}}>Average Rating<br /> {this.props.movie.addTomatoRating}</div>
+            <div style={{fontWeight: 'bold', float: 'left', marginRight: '3px'}}>RT Rating<br /> {this.props.movie.addTomatoMeter}%</div>
+            <div style={{fontWeight: 'bold', float: 'left'}}>RT Audience<br /> {this.props.movie.addTomatoUserMeter}%</div>
           </div>
         </div>
       </div>

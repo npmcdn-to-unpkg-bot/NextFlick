@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { increment, doubleAsync, getMovies } from '../modules/home'
+import { increment, doubleAsync, getMovies, getRecommendations } from '../modules/home'
 
 /*  This is a container component. Notice it does not contain any JSX,
     nor does it import React. This component is **only** responsible for
@@ -13,7 +13,8 @@ import Counter from 'components/Home'
     implementing our wrapper around increment; the component doesn't care   */
 
 const mapActionCreators = {
-  getMovies
+  getMovies,
+  getRecommendations
 }
 
 const mapStateToProps = (state) => ({

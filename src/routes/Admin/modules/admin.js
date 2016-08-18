@@ -121,6 +121,11 @@ export const getLocations = () => {
     return request.get('/api/locations').then((data) => dispatch(receiveLocations(data, getState().locations)))
   }
 }
+export const getAdditionalData = () => {
+  return (dispatch, getState) => {
+    return request.post('/api/additionaldata').then((data) => dispatch(receiveMovies(data, getState().movies)))
+  }
+}
 
 function csvToJson (csv) {
   const content = csv.split('\n')
@@ -481,6 +486,7 @@ export const deleteNewMovie = (data) => {
   }
 }
 
+
 /*  This is a thunk, meaning it is a function that immediately
     returns a function for lazy evaluation. It is incredibly useful for
     creating async actions, especially when combined with redux-thunk!
@@ -507,7 +513,8 @@ export const actions = {
   uploadConflicts,
   uploadGenres,
   uploadLocations,
-  deleteMovie
+  deleteMovie,
+  getAdditionalData
 }
 
 // ------------------------------------
