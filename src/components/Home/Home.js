@@ -6,6 +6,7 @@ import Logo from './assets/newlogo.png'
 import Loader from './assets/ajax-loader.gif'
 import $ from 'jquery'
 import _ from 'lodash'
+import {Pagination} from 'react-bootstrap'
 
 export default class Home extends Component {
   constructor (props) {
@@ -15,6 +16,7 @@ export default class Home extends Component {
     this.getMovieData = this.getMovieData.bind(this)
     this.onMovieNameChange = this.onMovieNameChange.bind(this)
     this.onSuggestionClick = this.onSuggestionClick.bind(this)
+    this.onPagination = this.onPagination.bind(this)
 
     this.state = {
       movies: [],
@@ -24,7 +26,11 @@ export default class Home extends Component {
       didYouMeanMessage: 'Did you mean ',
       movieName: '',
       recoMovies: [],
-      displayLoader: 'none'
+      displayLoader: 'none',
+      numberOfMovieis: 0,
+      pages: [],
+      selectedPage: 1,
+      nrOfMoviesPerPage: 50
     }
   }
 
@@ -43,10 +49,14 @@ export default class Home extends Component {
       this.state.movies.map(movie => this.state.options.add(movie))
     })
   }
-
+  onPagination (eventKey) {
+    this.setState({
+      selectedPage: eventKey
+    })
+  }
   getMovies (e) {
-    e.preventDefault()
     this.setState({displayLoader: 'initial'})
+    e.preventDefault()
     console.log(this.state.options)
     if (this.state.movieName !== '') {
       const suggestion = this.state.options.get(this.state.movieName)
@@ -63,7 +73,7 @@ export default class Home extends Component {
       }
     }
     let movieScores = []
-    const thisMovieData = this.state.moviesData.filter(x => x.Movie.toLowerCase() === this.state.movieName.toLowerCase())
+    const thisMovieData = this.state.moviesData.filter(x => x.Movie.toLowerCase() === this.state.movieName.trim().toLowerCase())
     if (thisMovieData.length === 1) {
       const thisMovie = thisMovieData[0]
       console.log(thisMovie)
@@ -304,7 +314,12 @@ export default class Home extends Component {
         }
       })
     })).then(() => {
-      this.setState({recoMovies: _.sortBy(recoMoviesData, 'score').reverse().filter(x => x.score >= 15), displayLoader: 'none'})
+      this.setState({
+        recoMovies: _.sortBy(recoMoviesData, 'score').reverse().filter(x => x.score >= 15),
+        displayLoader: 'none',
+        numberOfMovieis: recoMoviesData.filter(x => x.score >= 15).length,
+        pages: _.range(1, (Math.ceil(recoMoviesData.filter(x => x.score >= 15).length / 50)) + 1)
+      })
     })
   }
 
@@ -317,6 +332,8 @@ export default class Home extends Component {
     this.getMovies()
   }
   render () {
+      console.log(this.state.recoMovies
+              .filter((x, i) => this.state.nrOfMoviesPerPage * this.state.selectedPage - this.state.nrOfMoviesPerPage <= i < this.state.nrOfMoviesPerPage * this.state.selectedPage))
     return (
       <div className={'center-block'}>
         <img src={Logo}
@@ -337,7 +354,22 @@ export default class Home extends Component {
         <div className={'panel'}>
           <img src={Loader} alt='Loader' style={{display: this.state.displayLoader}} />
           <div>
-            {this.state.recoMovies.map((x, i) => <MovieContainer key={i} movie={x} title={x.Title} poster={x.Poster} />)}
+            {this.state.recoMovies
+              .filter((x, i) => i < this.state.nrOfMoviesPerPage * this.state.selectedPage && i >= this.state.nrOfMoviesPerPage * this.state.selectedPage - this.state.nrOfMoviesPerPage)
+              .map((x, i) => <MovieContainer key={i} movie={x} title={x.Title} poster={x.Poster} />)}
+          </div>
+          <div>
+            <Pagination
+              prev
+              next
+              first
+              last
+              ellipsis
+              boundaryLinks
+              items={this.state.pages.length}
+              maxButtons={5}
+              activePage={this.state.selectedPage}
+              onSelect={this.onPagination} />
           </div>
         </div>
       </div>
