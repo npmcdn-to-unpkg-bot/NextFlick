@@ -17,7 +17,7 @@ export default class Home extends Component {
     return (
       <div className={'col-md-3 ' + classes['col-centered']} key={this.props.movie._id}>
         <div className={'movie-container-header'} style={{textAlign: 'center'}}>
-          {this.props.movie.Movie}
+          {this.props.movie.Movie} Score:<span>{window.sessionStorage['userIsLogedIn'] ? this.props.movie.score : ''}</span>
         </div>
         <div className={classes['front']}>
           <img src={this.props.movie.addPoster} width='247' height='366' />
