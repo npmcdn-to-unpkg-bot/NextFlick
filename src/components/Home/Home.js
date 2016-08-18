@@ -57,7 +57,7 @@ export default class Home extends Component {
   }
 
   getMoviesAlg (movieName) {
-    this.setState({displayLoader: 'initial'})
+    this.setState({displayLoader: 'initial', recoMovies: [], numberOfMovieis: 0, pages: 0, selectedPage: 1})
     const movieObj = {
       movie: movieName
     }
