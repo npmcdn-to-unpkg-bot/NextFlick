@@ -13,9 +13,9 @@ import webpackDevMiddleware from './middleware/webpack-dev'
 import webpackHMRMiddleware from './middleware/webpack-hmr'
 import monk from 'monk'
 import wrap from 'co-monk'
-//const db = monk('localhost/NextFlick')
+const db = monk('localhost/NextFlick')
 // const db = monk('ds145395.mlab.com:45395/nextflick', {username : 'anitu', password : 'admin'})
-const db = monk('anitu:admin@ds145395.mlab.com:45395/nextflick')
+//const db = monk('anitu:admin@ds145395.mlab.com:45395/nextflick')
 const movies = wrap(db.get('movies'))
 const actors = wrap(db.get('actors'))
 const directors = wrap(db.get('directors'))
@@ -464,13 +464,13 @@ const saveMovie = function *(data) {
 const editMovie = function *(data) {
   console.log(data)
   return data.map(movie => {
-    movies.find({Movie: movie.Movie}, function (err, entry) {
+    movies.find({_id: monk.id(movie._id)}, function (err, entry) {
       if (err) {
         console.log('Error in first query')
         // return res.status(500).send('Something went wrong getting the data')
       }
       if (entry.length === 1) {
-        movies.update({Movie: movie.Movie}, movie)
+        movies.update({_id: monk.id(movie._id)}, {$set: movie})
       }
     })
   })

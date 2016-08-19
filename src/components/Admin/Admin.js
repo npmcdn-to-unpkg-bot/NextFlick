@@ -103,6 +103,8 @@ export default class Admin extends Component {
     this.updateFemaleClick = this.updateFemaleClick.bind(this)
     this.uploadMovie = this.uploadMovie.bind(this)
     this.getUploadMovieData = this.getUploadMovieData.bind(this)
+    this.onMovieNameChange = this.onMovieNameChange.bind(this)
+    this.onYearValChange = this.onYearValChange.bind(this)
     this.csvToJson = this.csvToJson.bind(this)
     this.uploadMovies = this.props.uploadMovies
   }
@@ -110,7 +112,16 @@ export default class Admin extends Component {
   componentDidMount () {
     this.getMovieData()
   }
-
+  onMovieNameChange (e) {
+    const selRow = this.state.selectedRow
+    selRow.Movie = e.target.value
+    this.setState({selectedRow: selRow})
+  }
+  onYearValChange (e) {
+    const selRow = this.state.selectedRow
+    selRow.Year = e.target.value
+    this.setState({selectedRow: selRow})
+  }
   getMovieData () {
     this.props.getData().then((res) => { this.setState({Movies: res.movies.data, displayLoader: 'none'}) })
     this.props.getActors().then((res) => {
@@ -581,10 +592,10 @@ export default class Admin extends Component {
                 <ModalBody>
                 <form id='edit-movie-form'>
                   <label>Movie</label>
-                  <input className={'form-control'} name='form-movie-name' value={this.state.selectedRow.Movie} placeholder='Movie name' />
+                  <input className={'form-control'} name='form-movie-name' value={this.state.selectedRow.Movie} onChange={this.onMovieNameChange} placeholder='Movie name' />
                   <br />
                   <label>Year</label>
-                  <input className={'form-control'} name='form-year' value={this.state.selectedRow.Year} placeholder='Year' />
+                  <input className={'form-control'} name='form-year' value={this.state.selectedRow.Year} onChange={this.onYearValChange} placeholder='Year' />
                   <br />
                   <label>Genres </label>
                   <Select
