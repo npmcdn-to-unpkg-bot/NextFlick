@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import UploadFile from 'components/Utils/UploadFile'
 import Select from 'react-select'
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table'
-import {Modal, Button, Alert, Tabs, Tab} from 'react-bootstrap'
+import {Modal, Button, Alert, Tabs, Tab, Checkbox} from 'react-bootstrap'
 import 'react-select/dist/react-select.css'
 import 'react-bootstrap-table/css/react-bootstrap-table-all.min.css'
 import $ from 'jquery'
@@ -17,6 +17,7 @@ export default class Admin extends Component {
 
     this.state = {
       Movies: [],
+      AddlMovies: [],
       Movie: '',
       Year: '',
       Location: '',
@@ -96,6 +97,7 @@ export default class Admin extends Component {
     }
 
     this.onMovieChange = this.onMovieChange.bind(this)
+    this.onFilterChange = this.onFilterChange.bind(this)
     this.onYearChange = this.onYearChange.bind(this)
     this.onGenreChange = this.onGenreChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
@@ -141,7 +143,14 @@ export default class Admin extends Component {
     this.props.getAdditionalData().then(this.getMovieData())
   }
   getMovieData () {
-    this.props.getData().then((res) => { this.setState({Movies: res.movies.data, displayLoader: 'none', displayAddlLoader: 'none'}) })
+    this.props.getData().then((res) => {
+      this.setState({
+        Movies: res.movies.data,
+        AddlMovies: res.movies.data,
+        displayLoader: 'none',
+        displayAddlLoader: 'none'
+      })
+    })
     this.props.getActors().then((res) => {
       const act = res.actors.data.map(function (elem) { return { value: elem.name, label: elem.name} })
       this.setState({Actors: act})
@@ -166,6 +175,15 @@ export default class Admin extends Component {
       const gen = res.locations.data.map(function (elem) { return { value: elem.name, label: elem.name} })
       this.setState({Locations: gen})
     })
+  }
+
+  onFilterChange (e) {
+    if (e.target.checked) {
+      this.setState({AddlMovies: this.state.Movies.filter(x => typeof x.addPoster === 'undefined' || x.addTomatoMeter === 'N/A')})
+    } else {
+      this.setState({AddlMovies: this.state.Movies})
+    }
+    console.log(e)
   }
   onMovieChange (e) {
     this.setState({Movie: e.target.value})
@@ -525,6 +543,10 @@ export default class Admin extends Component {
         blurToSave: true,
         afterSaveCell: this.onAfterAddlCellEdit
       }
+
+      const posterType = {
+        0: ''
+      }
       return (
 
       <div className={'container-fluid'}>
@@ -754,8 +776,10 @@ export default class Admin extends Component {
                   <br />
                   <br />
                   <hr />
+                  <label style={{float: 'left'}}>Edit individual movies additional data. For poster enter the link to the poster(all posters are from imdb)</label>
                   <br />
-                  <BootstrapTable data={this.state.Movies} search pagination cellEdit={addlCellEditProp} selectRow={addlSelectedRowProp}>
+                  <Checkbox style={{float: 'left'}} onChange={this.onFilterChange}>Show only movies with incomplete data</Checkbox>
+                  <BootstrapTable data={this.state.AddlMovies} search pagination cellEdit={addlCellEditProp} selectRow={addlSelectedRowProp}>
                     <TableHeaderColumn dataField='_id' hidden isKey>Movie ID</TableHeaderColumn>
                     <TableHeaderColumn dataField='Movie' editable={false}>Movie</TableHeaderColumn>
                     <TableHeaderColumn dataField='addPoster'>Poster URI</TableHeaderColumn>
