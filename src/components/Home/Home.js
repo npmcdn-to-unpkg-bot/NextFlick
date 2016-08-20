@@ -54,6 +54,7 @@ export default class Home extends Component {
     this.setState({
       selectedPage: eventKey
     })
+    $('html, body').animate({ scrollTop: 0 }, 'fast')
   }
 
   getMoviesAlg (movieName) {
