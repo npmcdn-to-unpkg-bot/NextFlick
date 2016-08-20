@@ -13,7 +13,7 @@ import webpackDevMiddleware from './middleware/webpack-dev'
 import webpackHMRMiddleware from './middleware/webpack-hmr'
 import monk from 'monk'
 import wrap from 'co-monk'
-//const db = monk('localhost/NextFlick')
+// const db = monk('localhost/NextFlick')
 // const db = monk('ds145395.mlab.com:45395/nextflick', {username : 'anitu', password : 'admin'})
 const db = monk('anitu:admin@ds145395.mlab.com:45395/nextflick')
 const movies = wrap(db.get('movies'))
@@ -24,6 +24,7 @@ const conflicts = wrap(db.get('conflicts'))
 const affiliations = wrap(db.get('affiliations'))
 const locations = wrap(db.get('locations'))
 const users = wrap(db.get('users'))
+const pointsystem = wrap(db.get('pointsystem'))
 
 const debug = _debug('app:server')
 const paths = config.utils_paths
@@ -36,9 +37,26 @@ router.post('/api/recommendations', function *() {
   let thisMovie = entry.filter(x => x.Movie.trim().toLowerCase() === this.request.body.movie.trim().toLowerCase())
   const fullMovieData = []
   if (thisMovie.length >= 1) {
+    const points = yield pointsystem.find({})
+    const genresPoints = points.filter(x => x.name === 'Genres')[0].value
+    const actorPoints = points.filter(x => x.name === 'Actors')[0].value
+    const directorsPoints = points.filter(x => x.name === 'Directors')[0].value
+    const simActorsPoints = points.filter(x => x.name === 'Similar Actors')[0].value
+    const simDirectorsPoints = points.filter(x => x.name === 'Similar Directors')[0].value
+    const conflictsPoints = points.filter(x => x.name === 'Central Conflicts')[0].value
+    const femaleLeadPoints = points.filter(x => x.name === 'Strong Female Lead')[0].value
+    const indiePoints = points.filter(x => x.name === 'Indie')[0].value
+    const awardsPoints = points.filter(x => x.name === 'Awards')[0].value
+    const affPoints = points.filter(x => x.name === 'Affiliations')[0].value
+    const locationsPoints = points.filter(x => x.name === 'Locations')[0].value
+    const rtRatingPoints = points.filter(x => x.name === 'RT Rating')[0].value
+    const rtAudiencePoints = points.filter(x => x.name === 'RT Audience')[0].value
+    const rtAvgRatingPoints = points.filter(x => x.name === 'RT Average Rating')[0].value
+    const yearPoints = points.filter(x => x.name === 'Year')[0].value
+
+
     thisMovie = thisMovie[0]
     let movieScores = []
-    console.log(entry)
   // genres
     for (let i = 0; i < thisMovie.Genre.length; i++) {
       const moviesWithSameGeners = entry
@@ -47,10 +65,10 @@ router.post('/api/recommendations', function *() {
       for (let j = 0; j < moviesWithSameGeners.length; j++) {
         let movieScore = movieScores.filter(x => x.movie === moviesWithSameGeners[j].Movie)
         if (movieScore.length === 0) {
-          movieScores.push({movie: moviesWithSameGeners[j].Movie, score: 5})
+          movieScores.push({movie: moviesWithSameGeners[j].Movie, score: parseInt(genresPoints)})
         } else {
           const currMovie = movieScores.filter(x => x.movie === moviesWithSameGeners[j].Movie)[0]
-          currMovie.score = currMovie.score + 5
+          currMovie.score = currMovie.score + parseInt(genresPoints)
         }
       }
     }
@@ -67,20 +85,20 @@ router.post('/api/recommendations', function *() {
       for (let j = 0; j < moviesWithSameActors.length; j++) {
         let movieScore = movieScores.filter(x => x.movie === moviesWithSameActors[j].Movie)
         if (movieScore.length === 0) {
-          movieScores.push({movie: moviesWithSameActors[j].Movie, score: 10})
+          movieScores.push({movie: moviesWithSameActors[j].Movie, score: parseInt(actorPoints)})
         } else {
           const currMovie = movieScores.filter(x => x.movie === moviesWithSameActors[j].Movie)[0]
-          currMovie.score = currMovie.score + 10
+          currMovie.score = currMovie.score + parseInt(actorPoints)
         }
       }
 
       for (let j = 0; j < moviesWithSimActors.length; j++) {
         let movieScore = movieScores.filter(x => x.movie === moviesWithSimActors[j].Movie)
         if (movieScore.length === 0) {
-          movieScores.push({movie: moviesWithSimActors[j].Movie, score: 5})
+          movieScores.push({movie: moviesWithSimActors[j].Movie, score: parseInt(simActorsPoints)})
         } else {
           const currMovie = movieScores.filter(x => x.movie === moviesWithSimActors[j].Movie)[0]
-          currMovie.score = currMovie.score + 5
+          currMovie.score = currMovie.score + parseInt(simActorsPoints)
         }
       }
     }
@@ -98,20 +116,20 @@ router.post('/api/recommendations', function *() {
       for (let j = 0; j < moviesWithSameDirectors.length; j++) {
         let movieScore = movieScores.filter(x => x.movie === moviesWithSameDirectors[j].Movie)
         if (movieScore.length === 0) {
-          movieScores.push({movie: moviesWithSameDirectors[j].Movie, score: 10})
+          movieScores.push({movie: moviesWithSameDirectors[j].Movie, score: parseInt(directorsPoints)})
         } else {
           const currMovie = movieScores.filter(x => x.movie === moviesWithSameDirectors[j].Movie)[0]
-          currMovie.score = currMovie.score + 10
+          currMovie.score = currMovie.score + parseInt(directorsPoints)
         }
       }
 
       for (let j = 0; j < moviesWithSimDirectors.length; j++) {
         let movieScore = movieScores.filter(x => x.movie === moviesWithSimDirectors[j].Movie)
         if (movieScore.length === 0) {
-          movieScores.push({movie: moviesWithSimDirectors[j].Movie, score: 5})
+          movieScores.push({movie: moviesWithSimDirectors[j].Movie, score: parseInt(simDirectorsPoints)})
         } else {
           const currMovie = movieScores.filter(x => x.movie === moviesWithSimDirectors[j].Movie)[0]
-          currMovie.score = currMovie.score + 5
+          currMovie.score = currMovie.score + parseInt(simDirectorsPoints)
         }
       }
     }
@@ -124,10 +142,10 @@ router.post('/api/recommendations', function *() {
       for (let j = 0; j < moviesWithSameConflicts.length; j++) {
         let movieScore = movieScores.filter(x => x.movie === moviesWithSameConflicts[j].Movie)
         if (movieScore.length === 0) {
-          movieScores.push({movie: moviesWithSameConflicts[j].Movie, score: 3})
+          movieScores.push({movie: moviesWithSameConflicts[j].Movie, score: parseInt(conflictsPoints)})
         } else {
           const currMovie = movieScores.filter(x => x.movie === moviesWithSameConflicts[j].Movie)[0]
-          currMovie.score = currMovie.score + 3
+          currMovie.score = currMovie.score + parseInt(conflictsPoints)
         }
       }
     }
@@ -140,10 +158,10 @@ router.post('/api/recommendations', function *() {
       for (let j = 0; j < moviesWithSameAffiliation.length; j++) {
         let movieScore = movieScores.filter(x => x.movie === moviesWithSameAffiliation[j].Movie)
         if (movieScore.length === 0) {
-          movieScores.push({movie: moviesWithSameAffiliation[j].Movie, score: 1})
+          movieScores.push({movie: moviesWithSameAffiliation[j].Movie, score: parseInt(affPoints)})
         } else {
           const currMovie = movieScores.filter(x => x.movie === moviesWithSameAffiliation[j].Movie)[0]
-          currMovie.score = currMovie.score + 1
+          currMovie.score = currMovie.score + parseInt(affPoints)
         }
       }
     }
@@ -157,10 +175,10 @@ router.post('/api/recommendations', function *() {
       for (let j = 0; j < moviesWithSameIndie.length; j++) {
         let movieScore = movieScores.filter(x => x.movie === moviesWithSameIndie[j].Movie)
         if (movieScore.length === 0) {
-          movieScores.push({movie: moviesWithSameIndie[j].Movie, score: 1})
+          movieScores.push({movie: moviesWithSameIndie[j].Movie, score: parseInt(indiePoints)})
         } else {
           const currMovie = movieScores.filter(x => x.movie === moviesWithSameIndie[j].Movie)[0]
-          currMovie.score = currMovie.score + 1
+          currMovie.score = currMovie.score + parseInt(indiePoints)
         }
       }
     }
@@ -174,10 +192,10 @@ router.post('/api/recommendations', function *() {
       for (let j = 0; j < moviesWithSameAwards.length; j++) {
         let movieScore = movieScores.filter(x => x.movie === moviesWithSameAwards[j].Movie)
         if (movieScore.length === 0) {
-          movieScores.push({movie: moviesWithSameAwards[j].Movie, score: 1})
+          movieScores.push({movie: moviesWithSameAwards[j].Movie, score: parseInt(awardsPoints)})
         } else {
           const currMovie = movieScores.filter(x => x.movie === moviesWithSameAwards[j].Movie)[0]
-          currMovie.score = currMovie.score + 1
+          currMovie.score = currMovie.score + parseInt(awardsPoints)
         }
       }
     }
@@ -191,10 +209,10 @@ router.post('/api/recommendations', function *() {
       for (let j = 0; j < moviesWithSameStrongFemaleLead.length; j++) {
         let movieScore = movieScores.filter(x => x.movie === moviesWithSameStrongFemaleLead[j].Movie)
         if (movieScore.length === 0) {
-          movieScores.push({movie: moviesWithSameStrongFemaleLead[j].Movie, score: 5})
+          movieScores.push({movie: moviesWithSameStrongFemaleLead[j].Movie, score: parseInt(femaleLeadPoints)})
         } else {
           const currMovie = movieScores.filter(x => x.movie === moviesWithSameStrongFemaleLead[j].Movie)[0]
-          currMovie.score = currMovie.score + 5
+          currMovie.score = currMovie.score + parseInt(femaleLeadPoints)
         }
       }
     }
@@ -208,10 +226,10 @@ router.post('/api/recommendations', function *() {
       for (let j = 0; j < moviesWithSameLocation.length; j++) {
         let movieScore = movieScores.filter(x => x.movie === moviesWithSameLocation[j].Movie)
         if (movieScore.length === 0) {
-          movieScores.push({movie: moviesWithSameLocation[j].Movie, score: 3})
+          movieScores.push({movie: moviesWithSameLocation[j].Movie, score: parseInt(locationsPoints)})
         } else {
           const currMovie = movieScores.filter(x => x.movie === moviesWithSameLocation[j].Movie)[0]
-          currMovie.score = currMovie.score + 3
+          currMovie.score = currMovie.score + parseInt(locationsPoints)
         }
       }
     }
@@ -223,10 +241,10 @@ router.post('/api/recommendations', function *() {
     for (let j = 0; j < moviesWithLowerTomatoRating.length; j++) {
       let movieScore = movieScores.filter(x => x.movie === moviesWithLowerTomatoRating[j].Movie)
       if (movieScore.length === 0) {
-        movieScores.push({movie: moviesWithLowerTomatoRating[j].Movie, score: -3})
+        movieScores.push({movie: moviesWithLowerTomatoRating[j].Movie, score: parseInt(rtAvgRatingPoints)})
       } else {
         const currMovie = movieScores.filter(x => x.movie === moviesWithLowerTomatoRating[j].Movie)[0]
-        currMovie.score = currMovie.score - 3
+        currMovie.score = currMovie.score + parseInt(rtAvgRatingPoints)
       }
     }
 
@@ -238,10 +256,10 @@ router.post('/api/recommendations', function *() {
     for (let j = 0; j < moviesWithLowerTomatoMeter.length; j++) {
       let movieScore = movieScores.filter(x => x.movie === moviesWithLowerTomatoMeter[j].Movie)
       if (movieScore.length === 0) {
-        movieScores.push({movie: moviesWithLowerTomatoMeter[j].Movie, score: -3})
+        movieScores.push({movie: moviesWithLowerTomatoMeter[j].Movie, score: parseInt(rtRatingPoints)})
       } else {
         const currMovie = movieScores.filter(x => x.movie === moviesWithLowerTomatoMeter[j].Movie)[0]
-        currMovie.score = currMovie.score - 3
+        currMovie.score = currMovie.score + parseInt(rtRatingPoints)
       }
     }
 
@@ -253,10 +271,10 @@ router.post('/api/recommendations', function *() {
     for (let j = 0; j < moviesWithLowerTomatoUserMeter.length; j++) {
       let movieScore = movieScores.filter(x => x.movie === moviesWithLowerTomatoUserMeter[j].Movie)
       if (movieScore.length === 0) {
-        movieScores.push({movie: moviesWithLowerTomatoUserMeter[j].Movie, score: -3})
+        movieScores.push({movie: moviesWithLowerTomatoUserMeter[j].Movie, score: parseInt(rtAudiencePoints)})
       } else {
         const currMovie = movieScores.filter(x => x.movie === moviesWithLowerTomatoUserMeter[j].Movie)[0]
-        currMovie.score = currMovie.score - 3
+        currMovie.score = currMovie.score + parseInt(rtAudiencePoints)
       }
     }
 
@@ -272,7 +290,7 @@ router.post('/api/recommendations', function *() {
     moviesWithYear.map(x => {
       if (Math.abs(x.Year - thisMovie.Year) >= 10) {
         const currMovie = movieScores.filter(y => y.movie === x.Movie)[0]
-        currMovie.score = currMovie.score - 3
+        currMovie.score = currMovie.score + parseInt(yearPoints)
       }
     })
 
@@ -417,6 +435,25 @@ router.post('/api/deleteMovie', function *() {
 router.get('/api/directors', function *() {
   const result = yield directors.find({})
   this.body = result
+})
+
+router.get('/api/pointsystem', function *() {
+  const result = yield pointsystem.find({})
+  this.body = result
+})
+
+router.post('/api/pointsystem', function *() {
+  const data = this.request.body
+  pointsystem.find({name: data.name}, function (err, entry) {
+    if (err) {
+      console.log(err)
+        // return res.status(500).send('Something went wrong getting the data')
+    }
+    if (entry.length === 1) {
+      pointsystem.update({name: data.name}, {$set: data})
+    }
+  })
+  this.body = yield pointsystem.find({})
 })
 
 const tryLogin = function *(data) {

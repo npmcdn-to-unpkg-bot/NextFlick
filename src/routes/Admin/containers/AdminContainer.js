@@ -11,6 +11,8 @@ import { getData,
   uploadLocations,
   getUploadMovieData,
   deleteMovie,
+  getPoints,
+  editPoint,
   getAdditionalData,
   getDirectors, getGenres, getConflicts, getAffiliations, saveMovie, editMovie, uploadMovie } from '../modules/admin'
 
@@ -45,6 +47,8 @@ const mapActionCreators = {
   uploadGenres,
   uploadLocations,
   deleteMovie,
+  getPoints,
+  editPoint,
   getAdditionalData
 }
 

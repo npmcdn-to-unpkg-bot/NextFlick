@@ -5,6 +5,7 @@ import _ from 'lodash'
 // ------------------------------------
 export const COUNTER_INCREMENT = 'COUNTER_INCREMENT'
 export const GET_MOVIES = 'GET_MOVIES'
+export const GET_POINTS = 'GET_POINTS'
 export const GET_ACTORS = 'GET_ACTORS'
 export const GET_DIRECTORS = 'GET_DIRECTORS'
 export const GET_GENRES = 'GET_GENRES'
@@ -60,6 +61,13 @@ export function receiveGenres (data, movies) {
   }
 }
 
+export function receivePoints (data, movies) {
+  return {
+    type: GET_POINTS,
+    points: data
+  }
+}
+
 export function receiveConflicts (data, movies) {
   return {
     type: GET_CONFLICTS,
@@ -96,6 +104,12 @@ export const getActors = () => {
 export const getGenres = () => {
   return (dispatch, getState) => {
     return request.get('/api/genres').then((data) => dispatch(receiveGenres(data, getState().genres)))
+  }
+}
+
+export const getPoints = () => {
+  return (dispatch, getState) => {
+    return request.get('/api/pointsystem').then((data) => dispatch(receivePoints(data, getState().points)))
   }
 }
 
@@ -265,6 +279,12 @@ export const deleteMovie = (data) => {
 export const editMovie = (data) => {
   return dispatch => {
     dispatch(editNewMovie(data))
+  }
+}
+
+export const editPoint = (data) => {
+  return dispatch => {
+    dispatch(editNewPoint(data))
   }
 }
 
@@ -486,6 +506,12 @@ export const deleteNewMovie = (data) => {
   }
 }
 
+export const editNewPoint = (data) => {
+  return (dispatch, getState) => {
+    return request.post('/api/pointsystem', data).then((data) => dispatch(receivePoints(data, getState().points)))
+  }
+}
+
 
 /*  This is a thunk, meaning it is a function that immediately
     returns a function for lazy evaluation. It is incredibly useful for
@@ -514,6 +540,8 @@ export const actions = {
   uploadGenres,
   uploadLocations,
   deleteMovie,
+  getPoints,
+  editPoint,
   getAdditionalData
 }
 
@@ -544,6 +572,11 @@ const ACTION_HANDLERS = {
   [GET_CONFLICTS]: (state, action) => {
     state.conflicts = []
     state.conflicts.push(action.conflicts.data)
+    return state
+  },
+  [GET_POINTS]: (state, action) => {
+    state.points = []
+    state.points.push(action.points.data)
     return state
   },
   [GET_LOCATIONS]: (state, action) => {
@@ -613,7 +646,8 @@ const initialState = {
   genres: [],
   conflicts: [],
   affiliations: [],
-  locations: []
+  locations: [],
+  points: []
 }
 export default function adminReducer (state = initialState, action) {
   const handler = ACTION_HANDLERS[action.type]

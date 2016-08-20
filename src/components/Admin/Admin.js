@@ -93,7 +93,8 @@ export default class Admin extends Component {
       hasAwards: true,
       hasFemaleLead: true,
       displayLoader: 'none',
-      displayAddlLoader: 'none'
+      displayAddlLoader: 'none',
+      points: []
     }
 
     this.onMovieChange = this.onMovieChange.bind(this)
@@ -121,12 +122,14 @@ export default class Admin extends Component {
     this.onYearValChange = this.onYearValChange.bind(this)
     this.onAddlRowSelect = this.onAddlRowSelect.bind(this)
     this.onAfterAddlCellEdit = this.onAfterAddlCellEdit.bind(this)
+    this.onAfterPointCellEdit = this.onAfterPointCellEdit.bind(this)
     this.csvToJson = this.csvToJson.bind(this)
     this.uploadMovies = this.props.uploadMovies
   }
 
   componentDidMount () {
     this.getMovieData()
+    this.props.getPoints().then(res => this.setState({points: res.points.data}))
   }
   onMovieNameChange (e) {
     const selRow = this.state.selectedRow
@@ -271,6 +274,13 @@ export default class Admin extends Component {
     console.log(row)
     const movieObj = [row]
     this.props.editMovie(movieObj)
+  }
+
+  onAfterPointCellEdit (row, cellName, cellValue) {
+    console.log("Save cell '" + cellName + "' with value '" + cellValue + "'")
+    console.log('Thw whole row :')
+    console.log(row)
+    this.props.editPoint(row)
   }
   onAddlRowSelect (row, isSelected) {
     if (isSelected) {
@@ -537,11 +547,17 @@ export default class Admin extends Component {
         bgColor: 'rgb(238, 193, 213)',
         onSelect: this.onAddlRowSelect
       }
-
+      
       const addlCellEditProp = {
         mode: 'click',
         blurToSave: true,
         afterSaveCell: this.onAfterAddlCellEdit
+      }
+
+      const pointCellEditProp = {
+        mode: 'click',
+        blurToSave: true,
+        afterSaveCell: this.onAfterPointCellEdit
       }
 
       const posterType = {
@@ -790,7 +806,13 @@ export default class Admin extends Component {
                   </BootstrapTable>
                 </div>
               </Tab>
-              <Tab eventKey={3} title='Point system management'></Tab>
+              <Tab eventKey={3} title='Point system management'>
+              <BootstrapTable data={this.state.points} search pagination cellEdit={pointCellEditProp}>
+                    <TableHeaderColumn dataField='_id' hidden isKey>Option ID</TableHeaderColumn>
+                    <TableHeaderColumn dataField='name' editable={false}>Name</TableHeaderColumn>
+                    <TableHeaderColumn dataField='value'>Value</TableHeaderColumn>
+                  </BootstrapTable>
+              </Tab>
             </Tabs>
             </div>
 
