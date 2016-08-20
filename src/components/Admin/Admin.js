@@ -91,6 +91,7 @@ export default class Admin extends Component {
       showModal: false,
       isIndie: true,
       hasAwards: true,
+      dontRecommend: false,
       hasFemaleLead: true,
       displayLoader: 'none',
       displayAddlLoader: 'none',
@@ -114,7 +115,9 @@ export default class Admin extends Component {
     this.handleAwardsClick = this.handleAwardsClick.bind(this)
     this.handleFemaleClick = this.handleFemaleClick.bind(this)
     this.updateIndieClick = this.updateIndieClick.bind(this)
+    this.handleDontRecommend = this.handleDontRecommend.bind(this)
     this.updateAwardsClick = this.updateAwardsClick.bind(this)
+    this.updateDontRecommendClick = this.updateDontRecommendClick.bind(this)
     this.updateFemaleClick = this.updateFemaleClick.bind(this)
     this.uploadMovie = this.uploadMovie.bind(this)
     this.getUploadMovieData = this.getUploadMovieData.bind(this)
@@ -246,6 +249,7 @@ export default class Admin extends Component {
       this.updateIndieClick(row)
       this.updateAwardsClick(row)
       this.updateFemaleClick(row)
+      this.updateDontRecommendClick(row)
     } else {
       const selectedRow = {
         _id: '',
@@ -269,17 +273,11 @@ export default class Admin extends Component {
   onAfterAddlCellEdit (row, cellName, cellValue) {
     row.addActors = row.Actor.join(', ')
     row.addDirector = row.Director.join(', ')
-    console.log("Save cell '" + cellName + "' with value '" + cellValue + "'")
-    console.log('Thw whole row :')
-    console.log(row)
     const movieObj = [row]
     this.props.editMovie(movieObj)
   }
 
   onAfterPointCellEdit (row, cellName, cellValue) {
-    console.log("Save cell '" + cellName + "' with value '" + cellValue + "'")
-    console.log('Thw whole row :')
-    console.log(row)
     this.props.editPoint(row)
   }
   onAddlRowSelect (row, isSelected) {
@@ -323,6 +321,12 @@ export default class Admin extends Component {
         awards = 'Yes'
       }
     }
+    let dontRecommend = false
+    if (serializeData.filter(x => x.name === 'form-dont-recommend').length === 1) {
+      if (serializeData.filter(x => x.name === 'form-dont-recommend')[0].value === 'on') {
+        dontRecommend = true
+      }
+    }
     let newMovie = {
       Movie: serializeData.filter(x => x.name === 'form-movie-name').length === 1 ? serializeData.filter(x => x.name === 'form-movie-name')[0].value : '',
       Year: serializeData.filter(x => x.name === 'form-year').length === 1 ? serializeData.filter(x => x.name === 'form-year')[0].value : '',
@@ -335,6 +339,7 @@ export default class Admin extends Component {
       Location: serializeData.filter(x => x.name === 'form-location').length === 1 ? serializeData.filter(x => x.name === 'form-location')[0].value : '',
       StrongFemaleLead: strongFemaleLead,
       Awards: awards,
+      dontRecommend: dontRecommend,
       CentralConflict: serializeData.filter(x => x.name === 'form-conflicts').length === 1 && serializeData.filter(x => x.name === 'form-conflicts')[0].value !== '' ? serializeData.filter(x => x.name === 'form-conflicts')[0].value.split(',').map(x => x.trim()) : [],
       Affiliation: serializeData.filter(x => x.name === 'form-affiliations').length === 1 && serializeData.filter(x => x.name === 'form-affiliations')[0].value !== '' ? serializeData.filter(x => x.name === 'form-affiliations')[0].value.split(',').map(x => x.trim()) : []
     }
@@ -358,6 +363,9 @@ export default class Admin extends Component {
   handleAwardsClick (e) {
     this.setState({hasAwards: e.target.checked})
   }
+  handleDontRecommend (e) {
+    this.setState({dontRecommend: e.target.checked})
+  }
   handleFemaleClick (e) {
     this.setState({hasFemaleLead: e.target.checked})
   }
@@ -374,6 +382,14 @@ export default class Admin extends Component {
       this.setState({hasAwards: false})
     } else {
       this.setState({hasAwards: true})
+    }
+  }
+
+  updateDontRecommendClick (row) {
+    if (typeof row.dontRecommend === 'undefined') {
+      this.setState({dontRecommend: false})
+    } else {
+      this.setState({dontRecommend: row.dontRecommend})
     }
   }
   updateFemaleClick (row) {
@@ -773,6 +789,10 @@ export default class Admin extends Component {
                   <br />
                   <label>Awards</label>
                   <input type='checkbox' name='form-awards' checked={this.state.hasAwards} onClick={this.handleAwardsClick} defaultChecked />
+                  <br />
+                  <label>Don't recommend</label>
+                  <input type='checkbox' name='form-dont-recommend' checked={this.state.dontRecommend} onClick={this.handleDontRecommend} defaultChecked/>
+                  <p className={'help-block'}>By checking this option the movie will not appear in the recommendations.</p>
                   <br />
                   </form>
                 </ModalBody>

@@ -87,7 +87,7 @@ export default class Home extends Component {
           }
         }
       }
-    }    
+    }
   }
 
   getMovies (e) {
@@ -104,7 +104,6 @@ export default class Home extends Component {
     this.getMoviesAlg(e.target.innerHTML)
   }
   render () {
-     // console.log(this.state.recoMovies              .filter((x, i) => this.state.nrOfMoviesPerPage * this.state.selectedPage - this.state.nrOfMoviesPerPage <= i < this.state.nrOfMoviesPerPage * this.state.selectedPage))
     return (
       <div className={'center-block'}>
         <img src={Logo}

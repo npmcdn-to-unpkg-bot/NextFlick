@@ -33,7 +33,7 @@ const router = require('koa-router')()
 const bodyParser = require('koa-body-parser')
 
 router.post('/api/recommendations', function *() {
-  const entry = yield movies.find({})
+  const entry = yield movies.find({$or: [{dontRecommend: false}, {dontRecommend: {$exists: false}}]})
   let thisMovie = entry.filter(x => x.Movie.trim().toLowerCase() === this.request.body.movie.trim().toLowerCase())
   const fullMovieData = []
   if (thisMovie.length >= 1) {
