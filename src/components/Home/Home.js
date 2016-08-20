@@ -51,10 +51,13 @@ export default class Home extends Component {
     })
   }
   onPagination (eventKey) {
+    const pageHasChanged = this.state.selectedPage !== eventKey
     this.setState({
       selectedPage: eventKey
     })
-    $('html, body').animate({ scrollTop: 0 }, 'fast')
+    if (pageHasChanged) {
+      $('html, body').animate({ scrollTop: 0 }, 'fast')
+    }
   }
 
   getMoviesAlg (movieName) {
