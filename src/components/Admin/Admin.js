@@ -74,6 +74,16 @@ export default class Admin extends Component {
         CentralConflict: [],
         Affiliation: []
       },
+      addlSelectedRow: {
+        _id: '',
+        addActors: [],
+        AddDirector: '',
+        addPlot: '',
+        addPoster: '',
+        addTomatoMeter: '',
+        addTomatoRating: '',
+        addTomatoUserMeter: ''
+      },
       alertMsj: 'Everything is up to date.',
       showAlert: true,
       alertType: 'info',
@@ -81,7 +91,8 @@ export default class Admin extends Component {
       isIndie: true,
       hasAwards: true,
       hasFemaleLead: true,
-      displayLoader: 'none'
+      displayLoader: 'none',
+      displayAddlLoader: 'none'
     }
 
     this.onMovieChange = this.onMovieChange.bind(this)
@@ -94,6 +105,7 @@ export default class Admin extends Component {
     this.updateMovie = this.updateMovie.bind(this)
     this.editMovie = this.editMovie.bind(this)
     this.deleteMovie = this.deleteMovie.bind(this)
+    this.getAddlData = this.getAddlData.bind(this)
     this.getMovieData = this.getMovieData.bind(this)
     this.handleIndieClick = this.handleIndieClick.bind(this)
     this.handleAwardsClick = this.handleAwardsClick.bind(this)
@@ -105,6 +117,8 @@ export default class Admin extends Component {
     this.getUploadMovieData = this.getUploadMovieData.bind(this)
     this.onMovieNameChange = this.onMovieNameChange.bind(this)
     this.onYearValChange = this.onYearValChange.bind(this)
+    this.onAddlRowSelect = this.onAddlRowSelect.bind(this)
+    this.onAfterAddlCellEdit = this.onAfterAddlCellEdit.bind(this)
     this.csvToJson = this.csvToJson.bind(this)
     this.uploadMovies = this.props.uploadMovies
   }
@@ -122,8 +136,12 @@ export default class Admin extends Component {
     selRow.Year = e.target.value
     this.setState({selectedRow: selRow})
   }
+  getAddlData () {
+    this.setState({displayAddlLoader: 'initial'})
+    this.props.getAdditionalData().then(this.getMovieData())
+  }
   getMovieData () {
-    this.props.getData().then((res) => { this.setState({Movies: res.movies.data, displayLoader: 'none'}) })
+    this.props.getData().then((res) => { this.setState({Movies: res.movies.data, displayLoader: 'none', displayAddlLoader: 'none'}) })
     this.props.getActors().then((res) => {
       const act = res.actors.data.map(function (elem) { return { value: elem.name, label: elem.name} })
       this.setState({Actors: act})
@@ -225,6 +243,35 @@ export default class Admin extends Component {
         Affiliation: []
       }
       this.setState({ selectedRow: selectedRow })
+    }
+  }
+  onAfterAddlCellEdit (row, cellName, cellValue) {
+    row.addActors = row.Actor.join(', ')
+    row.addDirector = row.Director.join(', ')
+    console.log("Save cell '" + cellName + "' with value '" + cellValue + "'")
+    console.log('Thw whole row :')
+    console.log(row)
+    const movieObj = [row]
+    this.props.editMovie(movieObj)
+  }
+  onAddlRowSelect (row, isSelected) {
+    if (isSelected) {
+      this.setState({ addlSelectedRow: row })
+      this.updateIndieClick(row)
+      this.updateAwardsClick(row)
+      this.updateFemaleClick(row)
+    } else {
+      const addlSelectedRow = {
+        _id: '',
+        addActors: [],
+        AddDirector: '',
+        addPlot: '',
+        addPoster: '',
+        addTomatoMeter: '',
+        addTomatoRating: '',
+        addTomatoUserMeter: ''
+      }
+      this.setState({ addlSelectedRow: addlSelectedRow })
     }
   }
 
@@ -466,8 +513,20 @@ export default class Admin extends Component {
         onSelect: this.onRowSelect
       }
 
+      const addlSelectedRowProp = {
+        mode: 'radio',
+        clickToSelect: true,
+        bgColor: 'rgb(238, 193, 213)',
+        onSelect: this.onAddlRowSelect
+      }
+
+      const addlCellEditProp = {
+        mode: 'click',
+        blurToSave: true,
+        afterSaveCell: this.onAfterAddlCellEdit
+      }
       return (
-        
+
       <div className={'container-fluid'}>
         <div className={'row'}>
           <Alert bsStyle={this.state.alertType} >
@@ -574,9 +633,9 @@ export default class Admin extends Component {
             </div>
             </div>
             <div className={'col-md-8 panel panel-default'}>
-            <Tabs defaultActiveKey={1} id="uncontrolled-tab-example">
+            <Tabs defaultActiveKey={1} id='uncontrolled-tab-example'>
               <Tab eventKey={1} title='Movies Management'>
-             
+
             <div className={classes['edit-button']} style={{display: 'inline'}}>
             <input type='button' className={'btn btn-primary'} style={{float: 'left', marginLeft: '10px', marginTop: '26px'}} value='Edit Movie' onClick={this.editMovie} />
             <input type='button' className={'btn btn-danger'} value='Delete Movie' style={{float: 'right', marginTop: '26px', marginRight: '10px'}} onClick={this.deleteMovie} />
@@ -690,17 +749,27 @@ export default class Admin extends Component {
                   <label style={{float: 'left'}}>Get posters for movies. Required after adding a movie or uploading movies</label>
                   <br />
                   <br />
-                  <Button onClick={this.props.getAdditionalData} className={'btn-success'} style={{float: 'left'}} >Get posters and RT scores</Button>
-                  <img src={Loader} alt='HTML5 Icon' style={{float: 'left', marginTop: '7px', marginLeft: '30px'}}/>
+                  <Button onClick={this.getAddlData} className={'btn-success'} style={{float: 'left'}} >Get posters and RT scores</Button>
+                  <img src={Loader} alt='HTML5 Icon' style={{float: 'left', marginTop: '7px', marginLeft: '30px', display: this.state.displayAddlLoader}} />
                   <br />
                   <br />
                   <hr />
+                  <br />
+                  <BootstrapTable data={this.state.Movies} search pagination cellEdit={addlCellEditProp} selectRow={addlSelectedRowProp}>
+                    <TableHeaderColumn dataField='_id' hidden isKey>Movie ID</TableHeaderColumn>
+                    <TableHeaderColumn dataField='Movie' editable={false}>Movie</TableHeaderColumn>
+                    <TableHeaderColumn dataField='addPoster'>Poster URI</TableHeaderColumn>
+                    <TableHeaderColumn dataField='addPlot'>Plot</TableHeaderColumn>
+                    <TableHeaderColumn dataField='addTomatoMeter' width='60'>RT Meter</TableHeaderColumn>
+                    <TableHeaderColumn dataField='addTomatoUserMeter' width='60'>RT User Meter</TableHeaderColumn>
+                    <TableHeaderColumn dataField='addTomatoRating' width='60'>RT Rating</TableHeaderColumn>
+                  </BootstrapTable>
                 </div>
               </Tab>
               <Tab eventKey={3} title='Point system management'></Tab>
             </Tabs>
             </div>
-            
+
         </div>
       </div>
     )
