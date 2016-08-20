@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import classes from './Home.scss'
-
+import $ from 'jquery'
 export default class Home extends Component {
   constructor (props) {
     super(props)
@@ -11,9 +11,6 @@ export default class Home extends Component {
   }
 
   render () {
-    if ((this.props.index + 1) % 3 === 0) {
-
-    }
     return (
       <div className={'col-md-3 ' + classes['col-centered']} key={this.props.movie._id}>
         <div className={'movie-container-header'} style={{textAlign: 'center'}}>
@@ -36,9 +33,9 @@ export default class Home extends Component {
           </div>
           <br />
           <div>
-            <div style={{fontWeight: 'bold', float: 'left', marginRight: '3px'}}>Average Rating<br /> {this.props.movie.addTomatoRating}</div>
-            <div style={{fontWeight: 'bold', float: 'left', marginRight: '3px'}}>RT Rating<br /> {this.props.movie.addTomatoMeter}%</div>
-            <div style={{fontWeight: 'bold', float: 'left'}}>RT Audience<br /> {this.props.movie.addTomatoUserMeter}%</div>
+            <div style={{float: 'left', marginRight: '2px'}}>Average Rating<br /> {this.props.movie.addTomatoRating}</div>
+            <div style={{float: 'left', marginRight: '2px'}}>RT Rating<br /> {this.props.movie.addTomatoMeter}%</div>
+            <div style={{float: 'left'}}>RT Audience<br /> {this.props.movie.addTomatoUserMeter}%</div>
           </div>
         </div>
       </div>
