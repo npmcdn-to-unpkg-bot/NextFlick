@@ -27,14 +27,14 @@ export default class Home extends Component {
       type: 'GET',
       crossDomain: true,
       dataType: 'jsonp',
-      url: 'https://api.themoviedb.org/3/search/movie/?api_key=fa88e72a8e91f5ef492c16015b032449&query=' + movieName
+      url: '//api.themoviedb.org/3/search/movie/?api_key=fa88e72a8e91f5ef492c16015b032449&query=' + movieName
     }).then(res => {
       const movieId = res.results[0].id
       $.ajax({
         type: 'GET',
         crossDomain: true,
         dataType: 'jsonp',
-        url: 'https://api.themoviedb.org/3/movie/' + movieId + '/videos?api_key=fa88e72a8e91f5ef492c16015b032449'
+        url: '//api.themoviedb.org/3/movie/' + movieId + '/videos?api_key=fa88e72a8e91f5ef492c16015b032449'
       }).then(res => {
         const youtubeKey = res.results.filter(x => x.type === 'Trailer')[0].key
         const youtubeUrl = 'https://www.youtube.com/embed/' + youtubeKey

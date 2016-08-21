@@ -54,7 +54,6 @@ router.post('/api/recommendations', function *() {
     const rtAvgRatingPoints = points.filter(x => x.name === 'RT Average Rating')[0].value
     const yearPoints = points.filter(x => x.name === 'Year')[0].value
 
-
     thisMovie = thisMovie[0]
     let movieScores = []
   // genres
@@ -323,18 +322,26 @@ const getAddlData = function (movie) {
      if (!error && response.statusCode === 200) {
        const bodyJson = JSON.parse(body)
        if (bodyJson.Response === 'True') {
-         movies.update({Movie: movie},
-           {
-             $set: {
-               addPoster: bodyJson.Poster,
-               addPlot: bodyJson.Plot,
-               addActors: bodyJson.Actors,
-               addDirector: bodyJson.Director,
-               addTomatoRating: bodyJson.tomatoRating,
-               addTomatoUserMeter: bodyJson.tomatoUserMeter,
-               addTomatoMeter: bodyJson.tomatoMeter
-             }
-           })
+         if (bodyJson.tomatoRating !== 'N/A' &&
+          bodyJson.tomatoUserMeter !== 'N/A' &&
+          bodyJson.tomatoMeter !== 'N/A' &&
+          bodyJson.tomatoRating !== '' &&
+          bodyJson.tomatoUserMeter !== '' &&
+          bodyJson.tomatoMeter !== '' &&
+          bodyJson.Poster !== '') {
+           movies.update({Movie: movie},
+             {
+               $set: {
+                 addPoster: bodyJson.Poster,
+                 addPlot: bodyJson.Plot,
+                 addActors: bodyJson.Actors,
+                 addDirector: bodyJson.Director,
+                 addTomatoRating: bodyJson.tomatoRating,
+                 addTomatoUserMeter: bodyJson.tomatoUserMeter,
+                 addTomatoMeter: bodyJson.tomatoMeter
+               }
+             })
+         }
        }
      }
    })
