@@ -305,11 +305,13 @@ router.post('/api/recommendations', function *() {
 })
 
 router.post('/api/additionaldata', function *() {
+  console.log('result')
   movies.find({}, function (err, entry) {
     if (err) {
       return 'Error'
     }
-    entry.map(e => getAddlData(e.Movie))
+    console.log(entry.length)
+    entry.map(e => {getAddlData(e.Movie)})
   })
 
   this.body = true
@@ -341,6 +343,8 @@ const getAddlData = function (movie) {
                  addTomatoMeter: bodyJson.tomatoMeter
                }
              })
+         } else {
+           //console.log(bodyJson)
          }
        }
      }

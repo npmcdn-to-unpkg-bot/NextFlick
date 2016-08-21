@@ -10,6 +10,7 @@ import _ from 'lodash'
 import classes from './Admin.scss'
 import Loader from './Assets/ajax-loader.gif'
 
+
 const {Header: ModalHeader, Title: ModalTitle, Body: ModalBody, Footer: ModalFooter} = Modal
 export default class Admin extends Component {
   constructor (props) {
@@ -563,7 +564,7 @@ export default class Admin extends Component {
         bgColor: 'rgb(238, 193, 213)',
         onSelect: this.onAddlRowSelect
       }
-      
+
       const addlCellEditProp = {
         mode: 'click',
         blurToSave: true,
@@ -791,7 +792,7 @@ export default class Admin extends Component {
                   <input type='checkbox' name='form-awards' checked={this.state.hasAwards} onClick={this.handleAwardsClick} defaultChecked />
                   <br />
                   <label>Don't recommend</label>
-                  <input type='checkbox' name='form-dont-recommend' checked={this.state.dontRecommend} onClick={this.handleDontRecommend} defaultChecked/>
+                  <input type='checkbox' name='form-dont-recommend' checked={this.state.dontRecommend} onClick={this.handleDontRecommend} defaultChecked />
                   <p className={'help-block'}>By checking this option the movie will not appear in the recommendations.</p>
                   <br />
                   </form>

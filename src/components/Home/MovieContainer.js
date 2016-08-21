@@ -1,13 +1,15 @@
 import React, {Component} from 'react'
 import classes from './Home.scss'
 import $ from 'jquery'
-import movieTrailer from 'movie-trailer'
+import theMovieDb from 'themoviedb-javascript-library'
 import {Modal} from 'react-bootstrap'
 const {Header: ModalHeader, Title: ModalTitle, Body: ModalBody, Footer: ModalFooter} = Modal
 
 export default class Home extends Component {
   constructor (props) {
     super(props)
+    theMovieDb.common.api_key = 'fa88e72a8e91f5ef492c16015b032449'
+    theMovieDb.common.base_uri = 'https://api.themoviedb.org/3/'
     console.log(this.props)
     this.state = {
       newRow: false,
@@ -23,23 +25,20 @@ export default class Home extends Component {
   openTrailer () {
     const propName = this.props.movie.Movie
     const movieName = propName.replace(' ', '%20')
-    $.ajax({
-      type: 'GET',
-      crossDomain: true,
-      dataType: 'jsonp',
-      url: '//api.themoviedb.org/3/search/movie/?api_key=fa88e72a8e91f5ef492c16015b032449&query=' + movieName + '/'
-    }).then(res => {
-      const movieId = res.results[0].id
-      $.ajax({
-        type: 'GET',
-        crossDomain: true,
-        dataType: 'jsonp',
-        url: '//api.themoviedb.org/3/movie/' + movieId + '/videos?api_key=fa88e72a8e91f5ef492c16015b032449/'
-      }).then(res => {
-        const youtubeKey = res.results.filter(x => x.type === 'Trailer')[0].key
+    const self = this
+    theMovieDb.search.getMovie({'query': encodeURIComponent(propName)}, function (e) {
+      const movieId = JSON.parse(e).results[0].id
+      theMovieDb.movies.getTrailers({ 'id': movieId },
+      function (res) {
+        console.log(JSON.parse(res))
+        const youtubeKey = JSON.parse(res).youtube.filter(x => x.type === 'Trailer')[0].source
         const youtubeUrl = 'https://www.youtube.com/embed/' + youtubeKey
-        this.setState({trailer: youtubeUrl})
+        self.setState({trailer: youtubeUrl})
+      }, function (err) {
+        console.log(err)
       })
+    }, function (er) {
+      console.log(er)
     })
     this.setState({showModal: true})
   }
