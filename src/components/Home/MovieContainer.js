@@ -52,26 +52,20 @@ export default class Home extends Component {
     
   }
 
-  componentDidMount () {
-    const self = this
-    $('<img width=\'247\' height=\'366\'/>').loadImage(self.props.movie.addPoster).done(function(img){
-      $('#'+self.state.posterContId).append(img)
-    });
-  }
   render () {
     let plot = this.props.movie.addPlot
 
     if (typeof plot !== 'undefined') {
       plot = this.props.movie.addPlot.length > 182 ? this.props.movie.addPlot.substring(0, 182).concat('...') : this.props.movie.addPlot
     }
-   
+
     return (
       <div className={'col-md-3 ' + classes['col-centered']} key={this.props.movie._id}>
         <div className={'movie-container-header'} style={{textAlign: 'center'}}>
           {this.props.movie.Movie} <span>{window.sessionStorage['userIsLogedIn'] ? 'Score: ' + this.props.movie.score : ''}</span>
         </div>
         <div className={classes['front']} id={this.state.posterContId}>
-
+          <img crossOrigin='' src={this.props.movie.addPoster} width='247' height='366' />
         </div>
         <div className={classes['back']}>
           <div>
