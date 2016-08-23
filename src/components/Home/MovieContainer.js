@@ -65,7 +65,7 @@ export default class Home extends Component {
           {this.props.movie.Movie} <span>{window.sessionStorage['userIsLogedIn'] ? 'Score: ' + this.props.movie.score : ''}</span>
         </div>
         <div className={classes['front']} id={this.state.posterContId}>
-          <img crossOrigin='' src={this.props.movie.addPoster} width='247' height='366' />
+          <img crossOrigin='anonymous' src={this.props.movie.addPoster.replace('http://','//').concat('/')} width='247' height='366' />
         </div>
         <div className={classes['back']}>
           <div>
