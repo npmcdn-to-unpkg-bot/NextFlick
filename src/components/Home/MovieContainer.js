@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import classes from './Home.scss'
 import $ from 'jquery'
 import theMovieDb from 'themoviedb-javascript-library'
+require('./load_image.js')
 import {Modal} from 'react-bootstrap'
 const {Header: ModalHeader, Title: ModalTitle, Body: ModalBody, Footer: ModalFooter} = Modal
 
@@ -10,15 +11,18 @@ export default class Home extends Component {
     super(props)
     theMovieDb.common.api_key = 'fa88e72a8e91f5ef492c16015b032449'
     theMovieDb.common.base_uri = 'https://api.themoviedb.org/3/'
-    console.log(this.props)
     this.state = {
       newRow: false,
       showModal: false,
-      trailer: ''
+      trailer: '',
+      poster: '',
+      posterContId: 'posterContainerId'.concat(this.props.movie._id)
     }
     this.close = this.close.bind(this)
     this.openTrailer = this.openTrailer.bind(this)
+    this.loadImage = this.loadImage.bind(this)
   }
+
   close () {
     this.setState({showModal: false})
   }
@@ -42,18 +46,36 @@ export default class Home extends Component {
     })
     this.setState({showModal: true})
   }
+
+  loadImage (e) {
+    console.log(e)
+    
+  }
+
+  componentDidMount () {
+    const self = this
+    $('<img width=\'247\' height=\'366\'/>').loadImage(self.props.movie.addPoster).done(function(img){
+      $('#'+self.state.posterContId).append(img)
+    });
+  }
   render () {
+    let plot = this.props.movie.addPlot
+
+    if (typeof plot !== 'undefined') {
+      plot = this.props.movie.addPlot.length > 182 ? this.props.movie.addPlot.substring(0, 182).concat('...') : this.props.movie.addPlot
+    }
+   
     return (
       <div className={'col-md-3 ' + classes['col-centered']} key={this.props.movie._id}>
         <div className={'movie-container-header'} style={{textAlign: 'center'}}>
           {this.props.movie.Movie} <span>{window.sessionStorage['userIsLogedIn'] ? 'Score: ' + this.props.movie.score : ''}</span>
         </div>
-        <div className={classes['front']}>
-          <img src={this.props.movie.addPoster} width='247' height='366' />
+        <div className={classes['front']} id={this.state.posterContId}>
+
         </div>
         <div className={classes['back']}>
           <div>
-            <span style={{fontWeight: 'bold'}}>SUMMARY</span><br /> {this.props.movie.addPlot.length > 182 ? this.props.movie.addPlot.substring(0, 182).concat('...') : this.props.movie.addPlot}
+            <span style={{fontWeight: 'bold'}}>SUMMARY</span><br /> {plot}
           </div>
           <br />
           <div>
@@ -78,6 +100,8 @@ export default class Home extends Component {
             </span>
           </div>
           <Modal show={this.state.showModal} onHide={this.close}>
+            <ModalHeader closeButton>
+            </ModalHeader>
             <ModalBody>
               <iframe width='560' height='315' src={this.state.trailer} frameBorder='0' allowFullScreen></iframe>
             </ModalBody>

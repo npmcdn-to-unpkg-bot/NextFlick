@@ -139,6 +139,7 @@
     "react-data-grid": "^1.0.21",
     "react-dom": "^15.0.0",
     "react-forms": "^1.0.0-rc6",
+    "react-image": "^0.1.0",
     "react-redux": "^4.0.0",
     "react-router": "^2.2.0",
     "react-router-redux": "^4.0.0",
