@@ -9,15 +9,6 @@
   <link rel="stylesheet" href="https://npmcdn.com/react-select/dist/react-select.css">
   <script type="text/javascript">
     var realSend = XMLHttpRequest.prototype.send;
-
-    // replace `send` with a wrapper
-    XMLHttpRequest.prototype.send = function() {
-        this.setRequestHeader("Access-Control-Allow-Origin", "*");
-
-        // run the real `send`
-        realSend.apply(this, arguments);
-    }
-
      window.onload=function(){
           (function(){
               if(window.location.protocol==="https:")
