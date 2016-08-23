@@ -7,7 +7,17 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/superhero/bootstrap.min.css">-->
   <link rel="stylesheet" href="https://npmcdn.com/react-select/dist/react-select.css">
-  
+  <script type="text/javascript">
+    var realSend = XMLHttpRequest.prototype.send;
+
+    // replace `send` with a wrapper
+    XMLHttpRequest.prototype.send = function() {
+        this.setRequestHeader("Access-Control-Allow-Origin", "*");
+
+        // run the real `send`
+        realSend.apply(this, arguments);
+    }
+  </script>
 </head>
 <body>
   <div id="root" style="height: 100%"></div>
