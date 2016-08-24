@@ -406,8 +406,13 @@ export default class Admin extends Component {
       this.setState({alertMsj: 'Select a movie before editing', alertType: 'danger'})
       return
     }
-    this.setState({ showModal: true })
-    console.log(this.state.selectedRow)
+    this.props.getSingleMovie({id: this.state.selectedRow._id}).then(res => {
+      this.setState({selectedRow: res.movies.data[0], showModal: true})
+      this.updateIndieClick(res.movies.data[0])
+      this.updateAwardsClick(res.movies.data[0])
+      this.updateFemaleClick(res.movies.data[0])
+      this.updateDontRecommendClick(res.movies.data[0])
+    })
   }
 
   deleteMovie () {

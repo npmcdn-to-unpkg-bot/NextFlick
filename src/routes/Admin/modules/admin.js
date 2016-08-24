@@ -141,6 +141,13 @@ export const getAdditionalData = () => {
   }
 }
 
+export const getAdditionalDataSingle = (data) => {
+  return (dispatch, getState) => {
+    return request.post('/api/additionaldatasingle', data).then((data) => dispatch(receiveMovies(data, getState().movies)))
+  }
+}
+
+
 function csvToJson (csv) {
   const content = csv.split('\n')
   const header = content[0].split(',')
@@ -435,6 +442,11 @@ export const uploadMovies = (data) => {
     return request.post('/api/movies', data).then((data) => dispatch(upload(data)))
   }
 }
+export const getSingleMovie = (data) => {
+  return (dispatch, getState) => {
+    return request.post('/api/singlemovie', data).then((data) => dispatch(receiveMovies(data)))
+  }
+}
 
 export const uploadActors = (data) => {
   return (dispatch, getState) => {
@@ -542,7 +554,8 @@ export const actions = {
   deleteMovie,
   getPoints,
   editPoint,
-  getAdditionalData
+  getAdditionalData,
+  getSingleMovie
 }
 
 // ------------------------------------

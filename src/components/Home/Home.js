@@ -104,6 +104,7 @@ export default class Home extends Component {
     this.getMoviesAlg(e.target.innerHTML)
   }
   render () {
+
     return (
       <div className={'center-block'}>
         <img src={Logo}

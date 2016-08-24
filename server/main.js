@@ -1,4 +1,5 @@
 import Koa from 'koa'
+import fs from 'fs'
 import convert from 'koa-convert'
 import webpack from 'webpack'
 import webpackConfig from '../build/webpack.config'
@@ -13,7 +14,7 @@ import webpackDevMiddleware from './middleware/webpack-dev'
 import webpackHMRMiddleware from './middleware/webpack-hmr'
 import monk from 'monk'
 import wrap from 'co-monk'
-// const db = monk('localhost/NextFlick')
+ // const db = monk('localhost/NextFlick')
 // const db = monk('ds145395.mlab.com:45395/nextflick', {username : 'anitu', password : 'admin'})
 const db = monk('anitu:admin@ds145395.mlab.com:45395/nextflick')
 const movies = wrap(db.get('movies'))
@@ -31,11 +32,22 @@ const paths = config.utils_paths
 const app = new Koa()
 const router = require('koa-router')()
 const bodyParser = require('koa-body-parser')
+const fid = require('fast-image-downloader')
 
 router.post('/api/recommendations', function *() {
-  const entry = yield movies.find({$or: [{dontRecommend: false}, {dontRecommend: {$exists: false}}]})
-  let thisMovie = entry.filter(x => x.Movie.trim().toLowerCase() === this.request.body.movie.trim().toLowerCase())
+  const entry1 = yield movies.find({}, {fields: {addPosterBuffer: 0}})
+  const entry = entry1.filter(x => {
+    if (x.dontRecommend === false) { 
+      return true
+    }
+    if (!('dontRecommend' in x)) {
+      return true
+    }
+  })
+  console.log(entry)
+  let thisMovie = entry1.filter(x => x.Movie.trim().toLowerCase() === this.request.body.movie.trim().toLowerCase())
   const fullMovieData = []
+  let movieScores = []
   if (thisMovie.length >= 1) {
     const points = yield pointsystem.find({})
     const genresPoints = points.filter(x => x.name === 'Genres')[0].value
@@ -55,7 +67,7 @@ router.post('/api/recommendations', function *() {
     const yearPoints = points.filter(x => x.name === 'Year')[0].value
 
     thisMovie = thisMovie[0]
-    let movieScores = []
+
   // genres
     for (let i = 0; i < thisMovie.Genre.length; i++) {
       const moviesWithSameGeners = entry
@@ -301,23 +313,79 @@ router.post('/api/recommendations', function *() {
       fullMovieData.push(mov)
     }
   }
-  this.body = fullMovieData
+  const result = yield movies.find({Movie: {$in: movieScores.map(x => x.movie)}})
+  const result1 = result.map(x => { x.score = movieScores.filter(y => y.movie === x.Movie)[0].score; return x })
+  console.log(result1)
+  this.body = _.sortBy(result1, 'score').reverse().filter(x => x.score >= 15)
 })
 
 router.post('/api/additionaldata', function *() {
-  console.log('result')
-  movies.find({}, function (err, entry) {
+  const result = yield movies.find({}, {fields: {Movie: 1}}, function (err, entry) {
     if (err) {
       return 'Error'
     }
-    console.log(entry.length)
-    entry.map(e => {getAddlData(e.Movie)})
+    entry.map(e => { getAddlData(e) })
   })
 
-  this.body = true
+  this.body = result
 })
 
-const getAddlData = function (movie) {
+router.post('/api/singlemovie', function *() {
+  const result = yield movies.find({_id: monk.id(this.request.body.id)},
+    {
+      Movie: 1,
+      Year: 1,
+      Awards: 1,
+      Indie: 1,
+      Location: 1,
+      StrongFemaleLead: 1,
+      CentralConflict: 1,
+      Genre: 1,
+      SimilarActor: 1,
+      Actor: 1,
+      Director: 1,
+      SimilarDirector: 1,
+      Affiliation: 1,
+      dontRecommend: 1
+    })
+  this.body = result
+})
+
+router.post('/api/additionaldatasingle', function *() {
+  console.log('Getting Posters')
+  const posterResult = yield movies.find({$and:[{addPosterBuffer: {$exists: false}}, {addPoster: {$exists: true}}]}, {Movie: 1},
+    function (err, entry) {
+      if (err) {
+        console.log('Error getting Posters')
+      }
+      entry.map(entry => getPosterData(entry))
+    })
+  console.log(posterResult)
+})
+
+const getPosterData = function (e) {
+  const movie = e.Movie
+  fid(e.addPoster, 2000, ['jpg', 'png'], {strictSSL: false}, function (err, data) {
+    if (err) {
+      console.log('Err:' + err.error + '; onmovie:' + movie)
+    } else {
+      movies.update({_id: monk.id(e._id)},
+        {
+          $set: {
+            addPosterBuffer: data.body
+          }
+        }, function (err, entry) {
+          if (err) {
+            console.log('Error inserting poster')
+            console.log(err)
+          }
+        })
+    }
+  })
+}
+
+const getAddlData = function (e) {
+  const movie = e.Movie
   const concatenatedName = movie.trim().replace(' ', '+')
   request({method: 'GET', uri: 'http://www.omdbapi.com/?t=' + concatenatedName + '&y=&plot=short&r=json&tomatoes=true'},
    function (error, response, body) {
@@ -343,9 +411,7 @@ const getAddlData = function (movie) {
                  addTomatoMeter: bodyJson.tomatoMeter
                }
              })
-         } else {
-           //console.log(bodyJson)
-         }
+         } 
        }
      }
    })
@@ -357,8 +423,37 @@ router.post('/api/login', function *() {
 })
 
 router.get('/api/whatever', function *() {
-  const result = yield movies.find({})
+  const result = yield movies.find({}, {fields: { Movie: 1,
+     addPoster: 1,
+     addPlot: 1,
+     addTomatoMeter: 1,
+     addTomatoRating: 1,
+     addTomatoUserMeter: 1,
+     Actor: 1,
+      Director: 1 }})
   this.body = result
+})
+router.get('/api/movies', function *() {
+  const result = yield movies.find({}, { fields: { Movie: 1 } })
+  console.log(result)
+  this.body = result
+})
+
+router.post('/api/posters', function *() {
+  const result = this.request.body
+  const resPosters = []
+  const data = result.data.map(x => {
+    fid(x.addPoster, 2000, ['jpg', 'png'], {strictSSL: false}, function (err, data) {
+      if (err) {
+        console.log(err.error)
+      } else {
+        return data.body
+      }
+    })
+  })
+  console.log(data)
+  this.type = 'image/png'
+  this.body = data
 })
 
 router.post('/api/movies', function *() {
@@ -512,10 +607,35 @@ const saveMovie = function *(data) {
 const editMovie = function *(data) {
   console.log(data)
   return data.map(movie => {
-    movies.find({_id: monk.id(movie._id)}, function (err, entry) {
+    movies.find({$or: [{_id: monk.id(movie._id)}, {Movie: movie.Movie}]}, function (err, entry) {
       if (err) {
-        console.log('Error in first query')
+        console.log(err)
+        console.log('Error in first query edit movie')
         // return res.status(500).send('Something went wrong getting the data')
+      }
+      if (typeof movie.addPoster !== 'undefined') {
+        fid(movie.addPoster.trim(), 2000, ['jpg', 'png'], {strictSSL: false}, function (err, data) {
+          if (err) {
+            console.log(err)
+            console.log('Err:' + err.error)
+          } else {
+              // fs.writeFile('arghhhh'+concatenatedName+'.jpg', data.body, function (err) {})
+            console.log(data.body)
+            movies.update({_id: monk.id(movie._id)},
+              {
+                $set: {
+                  addPosterBuffer: data.body
+                }
+              }, function (err, entry) {
+                if (err) {
+                  console.log('Error inserting poster')
+                  console.log(err)
+                } else {
+                  console.log(entry)
+                }
+              })
+          }
+        })
       }
       if (entry.length === 1) {
         movies.update({_id: monk.id(movie._id)}, {$set: movie})

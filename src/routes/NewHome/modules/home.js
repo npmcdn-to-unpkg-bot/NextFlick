@@ -6,6 +6,7 @@ import _ from 'lodash'
 // ------------------------------------
 export const COUNTER_INCREMENT = 'COUNTER_INCREMENT'
 export const GET_MOVIES = 'GET_MOVIES'
+export const GET_POSTERS = 'GET_POSTERS'
 
 // ------------------------------------
 // Actions
@@ -22,15 +23,27 @@ export function receiveMovies (data) {
     movies: data
   }
 }
+export function receivePosters (data) {
+  return {
+    type: GET_POSTERS,
+    posters: data
+  }
+}
 export const getMovies = () => {
   return (dispatch, getState) => {
-    return request.get('/api/whatever').then((data) => dispatch(receiveMovies(data)))
+    return request.get('/api/movies').then((data) => dispatch(receiveMovies(data)))
   }
 }
 
 export const getRecommendations = (data) => {
   return (dispatch, getState) => {
     return request.post('/api/recommendations', data).then((data) => dispatch(receiveMovies(data)))
+  }
+}
+
+export const getPosters = (data) => {
+  return (dispatch, getState) => {
+    return request.post('/api/posters', data.movies).then((data) => dispatch(receivePosters(data)))
   }
 }
 /*  This is a thunk, meaning it is a function that immediately
@@ -56,7 +69,8 @@ export const actions = {
   increment,
   doubleAsync,
   getMovies,
-  getRecommendations
+  getRecommendations,
+  getPosters
 }
 
 // ------------------------------------
@@ -68,6 +82,11 @@ const ACTION_HANDLERS = {
     state.movies = []
     state.movies.push(action.movies.data)
     return state
+  },
+  [GET_POSTERS]: (state, action) => {
+    state.posters = []
+    state.posters.push(action.posters.data)
+    return state
   }
 }
 
@@ -75,7 +94,8 @@ const ACTION_HANDLERS = {
 // Reducer
 // ------------------------------------
 const initialState = {
-  movies: []
+  movies: [],
+  posters: []
 }
 export default function counterReducer (state = initialState, action) {
   const handler = ACTION_HANDLERS[action.type]

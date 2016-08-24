@@ -1,5 +1,7 @@
 import { connect } from 'react-redux'
-import { increment, doubleAsync, getMovies, getRecommendations } from '../modules/home'
+import { increment, doubleAsync, getMovies,
+  getPosters,
+   getRecommendations } from '../modules/home'
 
 /*  This is a container component. Notice it does not contain any JSX,
     nor does it import React. This component is **only** responsible for
@@ -14,11 +16,13 @@ import Counter from 'components/Home'
 
 const mapActionCreators = {
   getMovies,
-  getRecommendations
+  getRecommendations,
+  getPosters
 }
 
 const mapStateToProps = (state) => ({
-  movies: state.home.movies
+  movies: state.home.movies,
+  posters: state.home.posters
 })
 
 /*  Note: mapStateToProps is where you should use `reselect` to create selectors, ie:
