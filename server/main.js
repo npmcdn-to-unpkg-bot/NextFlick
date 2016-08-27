@@ -37,7 +37,7 @@ const fid = require('fast-image-downloader')
 router.post('/api/recommendations', function *() {
   const entry1 = yield movies.find({}, {fields: {addPosterBuffer: 0}})
   const entry = entry1.filter(x => {
-    if (x.dontRecommend === false) { 
+    if (x.dontRecommend === false) {
       return true
     }
     if (!('dontRecommend' in x)) {
@@ -320,16 +320,33 @@ router.post('/api/recommendations', function *() {
 })
 
 router.post('/api/additionaldata', function *() {
-  const result = yield movies.find({}, {fields: {Movie: 1}}, function (err, entry) {
+  const func = getAddlAndPosters()
+  func.next()
+  this.body = true
+})
+
+const getAddlAndPosters = function *() {
+  yield movies.find({$or: [{addPoster: {$exists: false}}, {addPoster: {$in: ['', 'N/A']}}]}, {fields: {Movie: 1}}, function (err, entry) {
     if (err) {
       return 'Error'
     }
     entry.map(e => { getAddlData(e) })
+    console.log('Finished getting additional data')
+    const func = getPostersApiCall()
+    setTimeout(() => func.next(), 5000)
   })
+}
 
-  this.body = result
-})
-
+const getPostersApiCall = function *() {
+  yield movies.find({$and: [{addPosterBuffer: {$exists: false}}, {addPoster: {$exists: true}}]}, {Movie: 1},
+    function (err, entry) {
+      if (err) {
+        console.log('Error getting Posters')
+      }
+      console.log('Getting posters')
+      entry.map(entry => getPosterData(entry))
+    })
+}
 router.post('/api/singlemovie', function *() {
   const result = yield movies.find({_id: monk.id(this.request.body.id)},
     {
@@ -353,7 +370,7 @@ router.post('/api/singlemovie', function *() {
 
 router.post('/api/additionaldatasingle', function *() {
   console.log('Getting Posters')
-  const posterResult = yield movies.find({$and:[{addPosterBuffer: {$exists: false}}, {addPoster: {$exists: true}}]}, {Movie: 1},
+  const posterResult = yield movies.find({$and: [{addPosterBuffer: {$exists: false}}, {addPoster: {$exists: true}}]}, {Movie: 1},
     function (err, entry) {
       if (err) {
         console.log('Error getting Posters')
@@ -363,9 +380,12 @@ router.post('/api/additionaldatasingle', function *() {
   console.log(posterResult)
 })
 
-const getPosterData = function (e) {
+const getPosterData = function (e, url = null) {
   const movie = e.Movie
-  fid(e.addPoster, 2000, ['jpg', 'png'], {strictSSL: false}, function (err, data) {
+  if (url === null) {
+    url = e.addPoster
+  }
+  fid(url, 2000, ['jpg', 'png'], {strictSSL: false}, function (err, data) {
     if (err) {
       console.log('Err:' + err.error + '; onmovie:' + movie)
     } else {
@@ -397,21 +417,28 @@ const getAddlData = function (e) {
           bodyJson.tomatoMeter !== 'N/A' &&
           bodyJson.tomatoRating !== '' &&
           bodyJson.tomatoUserMeter !== '' &&
-          bodyJson.tomatoMeter !== '' &&
-          bodyJson.Poster !== '') {
+          bodyJson.tomatoMeter !== '') {
+           movies.update({Movie: movie},
+             {
+               $set: {
+                 addTomatoRating: bodyJson.tomatoRating,
+                 addTomatoUserMeter: bodyJson.tomatoUserMeter,
+                 addTomatoMeter: bodyJson.tomatoMeter
+               }
+             })
+         }
+         if (bodyJson.Poster !== '') {
            movies.update({Movie: movie},
              {
                $set: {
                  addPoster: bodyJson.Poster,
                  addPlot: bodyJson.Plot,
                  addActors: bodyJson.Actors,
-                 addDirector: bodyJson.Director,
-                 addTomatoRating: bodyJson.tomatoRating,
-                 addTomatoUserMeter: bodyJson.tomatoUserMeter,
-                 addTomatoMeter: bodyJson.tomatoMeter
+                 addDirector: bodyJson.Director
                }
              })
-         } 
+           // getPosterData(movie, bodyJson.Poster)
+         }
        }
      }
    })
