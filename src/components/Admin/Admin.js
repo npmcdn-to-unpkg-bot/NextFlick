@@ -186,7 +186,22 @@ export default class Admin extends Component {
 
   onFilterChange (e) {
     if (e.target.checked) {
-      this.setState({AddlMovies: this.state.Movies.filter(x => typeof x.addPoster === 'undefined' || x.addTomatoMeter === 'N/A')})
+      this.setState({AddlMovies: this.state.Movies.filter(x => typeof x.addPoster === 'undefined' ||
+       x.addTomatoMeter === 'N/A' ||
+       x.addPoster === '' ||
+       x.addPoster === 'N/A' ||
+       x.addPlot === '' ||
+       x.addPlot === 'N/A' ||
+       x.addTomatoMeter === '' ||
+       x.addTomatoUserMeter === '' ||
+       x.addTomatoRating === '' ||
+       x.addTomatoUserMeter === 'N/A' ||
+       x.addTomatoRating === 'N/A' ||
+       typeof x.addTomatoUserMeter === 'undefined' ||
+       typeof x.addPlot === 'undefined' ||
+       typeof x.addTomatoMeter === 'undefined' ||
+       typeof x.addTomatoRating === 'undefined'
+       )})
     } else {
       this.setState({AddlMovies: this.state.Movies})
     }
