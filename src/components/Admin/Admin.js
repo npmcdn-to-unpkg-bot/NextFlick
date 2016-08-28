@@ -102,7 +102,6 @@ export default class Admin extends Component {
     this.onMovieChange = this.onMovieChange.bind(this)
     this.onFilterChange = this.onFilterChange.bind(this)
     this.onYearChange = this.onYearChange.bind(this)
-    this.onGenreChange = this.onGenreChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
     this.onRowSelect = this.onRowSelect.bind(this)
     this.close = this.close.bind(this)
@@ -148,6 +147,65 @@ export default class Admin extends Component {
   getAddlData () {
     this.setState({displayAddlLoader: 'initial'})
     this.props.getAdditionalData().then(this.getMovieData())
+  }
+ 
+  getDeleteMovieData (id) {
+    const tempMovies = this.state.Movies
+    const tempMoviesArr = tempMovies.filter(x => x._id !== id)
+    this.setState({Movies: tempMoviesArr,AddlMovies: tempMoviesArr})
+    this.props.getActors().then((res) => {
+      const act = res.actors.data.map(function (elem) { return { value: elem.name, label: elem.name} })
+      this.setState({Actors: act})
+    })
+    this.props.getDirectors().then((res) => {
+      const dir = res.directors.data.map(function (elem) { return { value: elem.name, label: elem.name} })
+      this.setState({Directors: dir})
+    })
+    this.props.getGenres().then((res) => {
+      const gen = res.genres.data.map(function (elem) { return { value: elem.name, label: elem.name} })
+      this.setState({Genre: gen})
+    })
+    this.props.getConflicts().then((res) => {
+      const gen = res.conflicts.data.map(function (elem) { return { value: elem.name, label: elem.name} })
+      this.setState({Conflicts: gen})
+    })
+    this.props.getAffiliations().then((res) => {
+      const gen = res.affiliations.data.map(function (elem) { return { value: elem.name, label: elem.name} })
+      this.setState({Affiliations: gen})
+    })
+    this.props.getLocations().then((res) => {
+      const gen = res.locations.data.map(function (elem) { return { value: elem.name, label: elem.name} })
+      this.setState({Locations: gen})
+    })
+  }
+  getEditMovieData (editedMovie) {
+    const tempMovies = this.state.Movies
+    tempMovies.filter(x => x._id === editedMovie._id)[0] = editedMovie
+    this.setState({Movies: tempMovies})
+    this.props.getActors().then((res) => {
+      const act = res.actors.data.map(function (elem) { return { value: elem.name, label: elem.name} })
+      this.setState({Actors: act})
+    })
+    this.props.getDirectors().then((res) => {
+      const dir = res.directors.data.map(function (elem) { return { value: elem.name, label: elem.name} })
+      this.setState({Directors: dir})
+    })
+    this.props.getGenres().then((res) => {
+      const gen = res.genres.data.map(function (elem) { return { value: elem.name, label: elem.name} })
+      this.setState({Genre: gen})
+    })
+    this.props.getConflicts().then((res) => {
+      const gen = res.conflicts.data.map(function (elem) { return { value: elem.name, label: elem.name} })
+      this.setState({Conflicts: gen})
+    })
+    this.props.getAffiliations().then((res) => {
+      const gen = res.affiliations.data.map(function (elem) { return { value: elem.name, label: elem.name} })
+      this.setState({Affiliations: gen})
+    })
+    this.props.getLocations().then((res) => {
+      const gen = res.locations.data.map(function (elem) { return { value: elem.name, label: elem.name} })
+      this.setState({Locations: gen})
+    })
   }
   getMovieData () {
     this.props.getData().then((res) => {
@@ -205,16 +263,12 @@ export default class Admin extends Component {
     } else {
       this.setState({AddlMovies: this.state.Movies})
     }
-    console.log(e)
   }
   onMovieChange (e) {
     this.setState({Movie: e.target.value})
   }
   onYearChange (e) {
     this.setState({Year: e.target.value})
-  }
-  onGenreChange (e) {
-    console.log(e)
   }
 
   handleSubmit (e) {
@@ -361,7 +415,7 @@ export default class Admin extends Component {
     }
     const movieObj = []
     movieObj.push(newMovie)
-    Promise.resolve(this.props.editMovie(movieObj)).then(this.getMovieData())
+    Promise.resolve(this.props.editMovie(movieObj)).then(this.getEditMovieData(newMovie))
     const id = this.state.selectedRow._id
     movieObj[0]._id = id
     this.setState({ showModal: false, alertType: 'info', selectedRow: movieObj[0], alertMsj: this.state.selectedRow.Movie + ' was updated!' })
@@ -435,11 +489,10 @@ export default class Admin extends Component {
       this.setState({alertMsj: 'Select a movie before deleting', alertType: 'danger'})
       return
     }
-    console.log(this.state.selectedRow._id)
     const body = {
       id: this.state.selectedRow._id
     }
-    Promise.resolve(this.props.deleteMovie(body)).then(this.getMovieData())
+    Promise.resolve(this.props.deleteMovie(body)).then(this.getDeleteMovieData(this.state.selectedRow._id))
     const movieName = this.state.selectedRow.Movie
     const selectedRow = {
       _id: '',
@@ -558,7 +611,7 @@ export default class Admin extends Component {
         self.props.uploadLocations(uploadData.locations)
         ]
 
-      Promise.all(promisesArr).then((d) => { console.log('--Getting Data--'); self.getMovieData() })
+      Promise.all(promisesArr).then((d) => { self.getMovieData() })
     }
   }
 

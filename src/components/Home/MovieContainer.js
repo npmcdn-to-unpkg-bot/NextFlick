@@ -16,11 +16,11 @@ export default class Home extends Component {
       showModal: false,
       trailer: '',
       poster: '',
+      noMovieTrailer: false,
       posterContId: 'posterContainerId'.concat(this.props.movie._id)
     }
     this.close = this.close.bind(this)
     this.openTrailer = this.openTrailer.bind(this)
-    this.loadImage = this.loadImage.bind(this)
   }
 
   close () {
@@ -34,10 +34,15 @@ export default class Home extends Component {
       const movieId = JSON.parse(e).results[0].id
       theMovieDb.movies.getTrailers({ 'id': movieId },
       function (res) {
-        console.log(JSON.parse(res))
-        const youtubeKey = JSON.parse(res).youtube.filter(x => x.type === 'Trailer')[0].source
-        const youtubeUrl = 'https://www.youtube.com/embed/' + youtubeKey
-        self.setState({trailer: youtubeUrl})
+        const youtubeFilter = JSON.parse(res).youtube.filter(x => x.type === 'Trailer')[0]
+        if (typeof youtubeFilter !== 'undefined') {
+          const youtubeKey = youtubeFilter.source
+          const youtubeUrl = 'https://www.youtube.com/embed/' + youtubeKey
+          self.setState({trailer: youtubeUrl})
+        } else {
+          self.setState({noMovieTrailer: true})
+        }
+
       }, function (err) {
         console.log(err)
       })
@@ -47,10 +52,6 @@ export default class Home extends Component {
     this.setState({showModal: true})
   }
 
-  loadImage (e) {
-    console.log(e)
-  }
-
   render () {
     let plot = this.props.movie.addPlot
 
@@ -58,6 +59,10 @@ export default class Home extends Component {
       plot = this.props.movie.addPlot.length > 182 ? this.props.movie.addPlot.substring(0, 182).concat('...') : this.props.movie.addPlot
     }
 
+    let iframe = <iframe width='560' height='315' src={this.state.trailer} frameBorder='0' allowFullScreen></iframe>
+    if (this.state.noMovieTrailer) {
+      iframe = <p style={{fontSize: '20px'}}>Sorry :( ! No trailer was found for this movie!</p>
+    }
     return (
       <div className={'col-md-3 ' + classes['col-centered']} key={this.props.movie._id}>
         <div className={'movie-container-header'} style={{textAlign: 'center'}}>
@@ -97,7 +102,7 @@ export default class Home extends Component {
             <ModalHeader closeButton>
             </ModalHeader>
             <ModalBody>
-              <iframe width='560' height='315' src={this.state.trailer} frameBorder='0' allowFullScreen></iframe>
+              {iframe}
             </ModalBody>
           </Modal>
         </div>

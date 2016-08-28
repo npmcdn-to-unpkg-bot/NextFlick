@@ -603,8 +603,6 @@ const ACTION_HANDLERS = {
     return state
   },
   [UPLOAD_MOVIES]: (state, action) => {
-    console.log(state)
-    console.log(action)
     return state
   },
   [UPLOAD_ACTORS]: (state, action) => {
