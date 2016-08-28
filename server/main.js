@@ -16,7 +16,8 @@ import monk from 'monk'
 import wrap from 'co-monk'
  // const db = monk('localhost/NextFlick')
 // const db = monk('ds145395.mlab.com:45395/nextflick', {username : 'anitu', password : 'admin'})
-const db = monk('anitu:admin@ds145395.mlab.com:45395/nextflick')
+//const db = monk('anitu:admin@ds145395.mlab.com:45395/nextflick')
+const db = monk('nextflickadmin:nextflickadmin@ds017896.mlab.com:17896/nextflick')
 const movies = wrap(db.get('movies'))
 const actors = wrap(db.get('actors'))
 const directors = wrap(db.get('directors'))
