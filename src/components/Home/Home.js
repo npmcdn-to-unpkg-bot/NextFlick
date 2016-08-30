@@ -47,6 +47,8 @@ export default class Home extends Component {
         options: new Matcher(),
         moviesData: res.movies.data
       })
+      this.state.options.setThreshold(5)
+      this.state.options.ignoreCase()
       this.state.movies.map(movie => this.state.options.add(movie))
     })
   }
