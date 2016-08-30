@@ -16,7 +16,8 @@ import monk from 'monk'
 import wrap from 'co-monk'
  // const db = monk('localhost/NextFlick')
 // const db = monk('ds145395.mlab.com:45395/nextflick', {username : 'anitu', password : 'admin'})
-//const db = monk('anitu:admin@ds145395.mlab.com:45395/nextflick')
+
+// const db = monk('anitu:admin@ds145395.mlab.com:45395/nextflick')
 //const db = monk('nextflickadmin:nextflickadmin@ds017896.mlab.com:17896/nextflick')
 const db = monk('nextflickadmin:nextflickadmin@ds021206-a0.mlab.com:21206,ds021206-a1.mlab.com:21206/nextflick?replicaSet=rs-ds021206')
 const movies = wrap(db.get('movies'))
@@ -28,6 +29,7 @@ const affiliations = wrap(db.get('affiliations'))
 const locations = wrap(db.get('locations'))
 const users = wrap(db.get('users'))
 const pointsystem = wrap(db.get('pointsystem'))
+const moviesposters = wrap(db.get('moviesposters'))
 
 const debug = _debug('app:server')
 const paths = config.utils_paths
@@ -315,38 +317,78 @@ router.post('/api/recommendations', function *() {
       fullMovieData.push(mov)
     }
   }
-  const result = yield movies.find({Movie: {$in: movieScores.map(x => x.movie)}})
-  const result1 = result.map(x => { x.score = movieScores.filter(y => y.movie === x.Movie)[0].score; return x })
+
+  const result = yield moviesposters.find({name: {$in: movieScores.map(x => x.movie)}})
+  const result1 = fullMovieData.map(x => { x.addPosterBuffer = result.filter(y => y.name === x.Movie)[0].addPosterBuffer; return x })
   console.log(result1)
-  this.body = _.sortBy(result1, 'score').reverse().filter(x => x.score >= 15)
+  this.body = result1
 })
 
 router.post('/api/additionaldata', function *() {
+ /* yield movies.find({addPoster: {$exists: true}}, {Movie: 1, addPoster: 1},
+    function (err, entry) {
+      if (err) {
+        console.log('Error getting Posters')
+      }
+      console.log('APP: Start getting posters')
+      entry.map(entry => getPosterData(entry))
+    })*/
   const func = getAddlAndPosters()
+  // func.next()
   func.next()
   this.body = true
 })
 
 const getAddlAndPosters = function *() {
-  yield movies.find({$or: [{addPoster: {$exists: false}}, {addPoster: {$in: ['', 'N/A']}}]}, {fields: {Movie: 1}}, function (err, entry) {
+  yield movies.find({$or: [{manualEdited: {$exists: false}}, {manualEdited: false}]}, {fields: {Movie: 1}}, function (err, entry) {
     if (err) {
       return 'Error'
     }
     entry.map(e => { getAddlData(e) })
     console.log('Finished getting additional data')
     const func = getPostersApiCall()
-    setTimeout(() => func.next(), 5000)
+    setTimeout(() => { func.next(); func.next() }, 5000)
   })
 }
 
+const getMoviesWithPosters = function *() {
+  const moviesWithPosters = yield moviesposters.find({addPosterBuffer: {$exists: true}}, {name: 1})
+  return moviesWithPosters
+}
+const sleep = function (milliseconds) {
+  var start = new Date().getTime()
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds) {
+      break
+    }
+  }
+}
 const getPostersApiCall = function *() {
-  yield movies.find({$and: [{addPosterBuffer: {$exists: false}}, {addPoster: {$exists: true}}]}, {Movie: 1},
+  console.log('APP: Getting posters')
+
+  yield movies.find({$and: [{addPoster: {$exists: true}}, {$or:[{manualEdited:false}, {manualEdited:{$exists:false}}]}]}, {Movie: 1, addPoster: 1},
     function (err, entry) {
       if (err) {
         console.log('Error getting Posters')
       }
-      console.log('Getting posters')
-      entry.map(entry => getPosterData(entry))
+      moviesposters.find({addPosterBuffer: {$exists: true}}, {name: 1},
+        function (err, moviesWithPosters) {
+          let moviesToUpdate = []
+          for (let i = 0; i < entry.length; i++) {
+            let exists = true
+            for (let j = 0; j < moviesWithPosters.length; j++) {
+              if (entry[i].Movie === moviesWithPosters[j].name) {
+                exists = false
+              }
+            }
+            if (exists) {
+              moviesToUpdate.push(entry[i])
+            }
+          }
+          console.log(moviesToUpdate[0])
+          console.log('APP: Start getting posters')
+           moviesToUpdate.map(e => getPosterData(e))
+        })
     })
 }
 router.post('/api/singlemovie', function *() {
@@ -372,36 +414,38 @@ router.post('/api/singlemovie', function *() {
 
 router.post('/api/additionaldatasingle', function *() {
   console.log('Getting Posters')
-  const posterResult = yield movies.find({$and: [{addPosterBuffer: {$exists: false}}, {addPoster: {$exists: true}}]}, {Movie: 1},
+  const moviesWithPosters = yield moviesposters.find({addPosterBuffer: {$exists: true}}, {name: 1})
+  const posterResult = yield movies.find({$and: [{addPoster: {$exists: true}}]}, {Movie: 1},
     function (err, entry) {
       if (err) {
         console.log('Error getting Posters')
       }
-      entry.map(entry => getPosterData(entry))
+      entry.map(entry => setTimeout(getPosterData(entry), 2000))
     })
   console.log(posterResult)
 })
 
 const getPosterData = function (e, url = null) {
+  console.log('APP: Getting poster for: ' + e.Movie)
   const movie = e.Movie
   if (url === null) {
     url = e.addPoster
   }
-  fid(url, 2000, ['jpg', 'png'], {strictSSL: false}, function (err, data) {
+  fid(url, 10000, ['jpg', 'png'], {strictSSL: false}, function (err, data) {
     if (err) {
       console.log('Err:' + err.error + '; onmovie:' + movie)
     } else {
-      movies.update({_id: monk.id(e._id)},
-        {
-          $set: {
-            addPosterBuffer: data.body
-          }
-        }, function (err, entry) {
-          if (err) {
-            console.log('Error inserting poster')
-            console.log(err)
-          }
-        })
+      moviesposters.find({name: e.Movie}, function (err, entry) {
+        if (err) {
+          console.log('Error: Inserting poster for movie ' + e.Movie)
+        }
+        if (entry.length === 0) {
+          console.log('APP: INSERTING POSTER FOR MOVIE ' + e.Movie)
+          moviesposters.insert({name: e.Movie, addPosterBuffer: data.body})
+        } else {
+          console.log('APP: UPDATING MOVIE ' + e.Movie)
+        }
+      })
     }
   })
 }
@@ -439,7 +483,6 @@ const getAddlData = function (e) {
                  addDirector: bodyJson.Director
                }
              })
-           // getPosterData(movie, bodyJson.Poster)
          }
        }
      }
@@ -634,39 +677,41 @@ const saveMovie = function *(data) {
 }
 
 const editMovie = function *(data) {
-  console.log(data)
+  console.log('APP: Editing movie ' + data[0].Movie)
   return data.map(movie => {
     movies.find({$or: [{_id: monk.id(movie._id)}, {Movie: movie.Movie}]}, function (err, entry) {
       if (err) {
         console.log(err)
-        console.log('Error in first query edit movie')
-        // return res.status(500).send('Something went wrong getting the data')
+        console.log('ERROR: Error in first query edit movie')
       }
       if (typeof movie.addPoster !== 'undefined') {
         fid(movie.addPoster.trim(), 2000, ['jpg', 'png'], {strictSSL: false}, function (err, data) {
           if (err) {
             console.log(err)
-            console.log('Err:' + err.error)
+            console.log('ERROR:' + err.error)
           } else {
-              // fs.writeFile('arghhhh'+concatenatedName+'.jpg', data.body, function (err) {})
-            console.log(data.body)
-            movies.update({_id: monk.id(movie._id)},
-              {
-                $set: {
-                  addPosterBuffer: data.body
-                }
-              }, function (err, entry) {
-                if (err) {
-                  console.log('Error inserting poster')
-                  console.log(err)
-                } else {
-                  console.log(entry)
-                }
-              })
+            console.log('APP: Getting poster for: ' + movie.Movie)
+            moviesposters.find({name: movie.Movie}, function (err, entry) {
+              if (err) {
+                console.log('Error: Inserting poster for movie ' + movie.Movie)
+              }
+              if (entry.length === 0) {
+                moviesposters.insert({name: movie.Movie, addPosterBuffer: data.body})
+              } else {
+                moviesposters.update({name: movie.Movie},
+                  {
+                    $set: {
+                      name: movie.Movie,
+                      addPosterBuffer: data.body
+                    }
+                  })
+              }
+            })
           }
         })
       }
       if (entry.length === 1) {
+        movie.manualEdited = true
         movies.update({_id: monk.id(movie._id)}, {$set: movie})
       }
     })
