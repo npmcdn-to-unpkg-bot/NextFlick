@@ -11,9 +11,7 @@
 <body>
   <div id="root" style="height: 100%;visibility:hidden"></div>
   <script type="text/javascript">
-    (function() {
-      document.getElementById('root').style.visibility = 'visible'
-    })();
+    window.onload = function () { document.getElementById('root').style.visibility = 'visible' }
   </script>
 </body>
 </html>
