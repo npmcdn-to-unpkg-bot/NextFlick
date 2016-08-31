@@ -9,6 +9,11 @@
   <link rel="stylesheet" href="https://npmcdn.com/react-select/dist/react-select.css">
 </head>
 <body>
-  <div id="root" style="height: 100%"></div>
+  <div id="root" style="height: 100%;visibility:hidden"></div>
+  <script type="text/javascript">
+    (function() {
+      document.getElementById('root').style.visibility = 'visible'
+    })();
+  </script>
 </body>
 </html>
